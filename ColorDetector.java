@@ -1,3 +1,8 @@
+/*
+ * Using JavaCV to detect the colors in an image
+ * SOURCE: http://ganeshtiwaridotcomdotnp.blogspot.de/2011/12/javacv-simple-color-detection-using.html
+ */
+
 import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
 import static org.bytedeco.javacpp.opencv_core.cvGetSize;
 import static org.bytedeco.javacpp.opencv_core.cvInRangeS;
@@ -44,21 +49,21 @@ public class ColorDetector implements Runnable {
 	void getThresholdedImage(String s) {
 
 		String filename = "";
-		
+
 		filename = "ColorFades.jpg";
-//		filename = "ColorWall.jpg";
-//		filename = "Pixels.jpg";
-//		filename = "Rainbow.jpg";
-//		filename = "RGB.jpg";
-//		filename = "Wheel.jpg";	
-		
+		// filename = "ColorWall.jpg";
+		// filename = "Pixels.jpg";
+		// filename = "Rainbow.jpg";
+		// filename = "RGB.jpg";
+		// filename = "Wheel.jpg";
+
 		IplImage orgImg = cvLoadImage(filename);
-//		IplImage orgImg = cvLoadImage(filename);
-//		IplImage orgImg = cvLoadImage(filename);
-//		IplImage orgImg = cvLoadImage(filename);
-//		IplImage orgImg = cvLoadImage(filename);
-//		IplImage orgImg = cvLoadImage(filename);
-		
+		// IplImage orgImg = cvLoadImage(filename);
+		// IplImage orgImg = cvLoadImage(filename);
+		// IplImage orgImg = cvLoadImage(filename);
+		// IplImage orgImg = cvLoadImage(filename);
+		// IplImage orgImg = cvLoadImage(filename);
+
 		IplImage imgThreshold = cvCreateImage(cvGetSize(orgImg), 8, 1);
 		// apply thresholding
 
@@ -89,7 +94,5 @@ public class ColorDetector implements Runnable {
 	}
 
 	public void run() {
-		// TODO Auto-generated method stub
-		
 	}
 }

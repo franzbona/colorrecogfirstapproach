@@ -1,3 +1,9 @@
+/*
+ * Just an example using JavaCV to make a colored object tracking
+ * SOURCE: https://github.com/bytedeco/javacv/blob/master/samples/ColoredObjectTrack.java
+ * I adapted it to create a link between the points detected from the camera
+ */
+
 import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_8U;
 import static org.bytedeco.javacpp.opencv_core.cvFlip;
 import static org.bytedeco.javacpp.opencv_core.cvGetSize;
@@ -62,6 +68,7 @@ public class ColoredObjectTrack implements Runnable {
 
 		Scanner in = new Scanner(System.in);
 
+		//asks users which color to track
 		while (!s.equals("red") && !s.equals("blue") && !s.equals("green")) {
 
 			System.out.println("Which colour would you like to detect?");
@@ -88,13 +95,14 @@ public class ColoredObjectTrack implements Runnable {
 			g.setColor(Color.GREEN);
 
 		g.fillOval(posX, posY, 5, 5);
-		// g.drawOval(posX, posY, 20, 20);
 		System.out.println(posX + " , " + posY);
 
+		//checks if already 1 point is drawn
 		if (count > 1) {
 			g.drawLine(posX, posY, oldposX, oldposY);
 		}
-
+		
+		//updates point location
 		oldposX = posX;
 		oldposY = posY;
 
@@ -104,6 +112,7 @@ public class ColoredObjectTrack implements Runnable {
 		IplImage imgThreshold = AbstractIplImage
 				.create(cvGetSize(orgImg), 8, 1);
 
+		//checks color and detects it if in range
 		if (s.equals("red")) {
 
 			color = 'r';
@@ -128,6 +137,7 @@ public class ColoredObjectTrack implements Runnable {
 			cvInRangeS(orgImg, green_min, green_max, imgThreshold);// green
 		}
 
+		//smoothes the image according to the parameters
 		cvSmooth(imgThreshold, imgThreshold, CV_MEDIAN, 15, 0, 0, 0);
 		cvSaveImage("dsmthreshold.jpg", imgThreshold);
 		return imgThreshold;
@@ -160,7 +170,7 @@ public class ColoredObjectTrack implements Runnable {
 				img = converter.convert(grabber.grab());
 				if (img != null) {
 					// show image on window
-					cvFlip(img, img, 1);// l-r = 90_degrees_steps_anti_clockwise
+					cvFlip(img, img, 1);
 					canvas.showImage(converter.convert(img));
 					IplImage detectThrs = getThresholdImage(img);
 

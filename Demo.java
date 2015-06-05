@@ -1,3 +1,9 @@
+/*
+ * Just an example using JavaCV to detect my face and track stuff around
+ * SOURCE: https://github.com/bytedeco/javacv
+ * I changed the colors + other minor changes
+ */
+
 import static org.bytedeco.javacpp.helper.opencv_core.cvDrawContours;
 import static org.bytedeco.javacpp.helper.opencv_imgproc.cvFindContours;
 import static org.bytedeco.javacpp.helper.opencv_objdetect.cvHaarDetectObjects;

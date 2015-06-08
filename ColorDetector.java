@@ -11,9 +11,14 @@ import static org.bytedeco.javacpp.opencv_highgui.cvLoadImage;
 import static org.bytedeco.javacpp.opencv_highgui.cvSaveImage;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_MEDIAN;
 import static org.bytedeco.javacpp.opencv_imgproc.cvSmooth;
+import static org.bytedeco.javacpp.opencv_core.cvGetImageROI;
+import static org.bytedeco.javacpp.opencv_core.cvRect;
+import static org.bytedeco.javacpp.opencv_core.cvSetImageROI;
+import static org.bytedeco.javacpp.opencv_core.cvAvg;
 
 import java.util.Scanner;
 
+import org.bytedeco.javacpp.opencv_core.CvRect;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 
@@ -50,20 +55,18 @@ public class ColorDetector implements Runnable {
 
 		String filename = "";
 
-		filename = "ColorFades.jpg";
+		// filename = "ColorFades.jpg";
 		// filename = "ColorWall.jpg";
-		// filename = "Pixels.jpg";
+		filename = "Pixels.jpg";
 		// filename = "Rainbow.jpg";
 		// filename = "RGB.jpg";
 		// filename = "Wheel.jpg";
 
 		IplImage orgImg = cvLoadImage(filename);
-		// IplImage orgImg = cvLoadImage(filename);
-		// IplImage orgImg = cvLoadImage(filename);
-		// IplImage orgImg = cvLoadImage(filename);
-		// IplImage orgImg = cvLoadImage(filename);
-		// IplImage orgImg = cvLoadImage(filename);
 
+		//gets the mean of the upper-left corner of the Image
+		mean(orgImg, 0, 0, 15, 15);
+		
 		IplImage imgThreshold = cvCreateImage(cvGetSize(orgImg), 8, 1);
 		// apply thresholding
 
@@ -89,10 +92,22 @@ public class ColorDetector implements Runnable {
 		}
 
 		cvSmooth(imgThreshold, imgThreshold, CV_MEDIAN, 15, 0, 0, 0);
-		cvSaveImage(filename + "_thr", imgThreshold);
+		cvSaveImage("thr_" + filename, imgThreshold);
 		System.out.println("DONE");
 	}
 
 	public void run() {
+	}
+
+	CvScalar mean(IplImage orgImg, int x, int y, int width, int height) {
+
+		// get current ROI so that the image's roi is not changed by calling
+		CvRect old_roi = cvGetImageROI(orgImg);
+		cvSetImageROI(orgImg, cvRect(x, y, width, height));
+		CvScalar c = cvAvg(orgImg);
+		cvSetImageROI(orgImg, old_roi); // reset old roi
+		//System.out.println(c);
+		return c;
+
 	}
 }

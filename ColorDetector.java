@@ -16,7 +16,7 @@ import static org.bytedeco.javacpp.opencv_core.cvRect;
 import static org.bytedeco.javacpp.opencv_core.cvSetImageROI;
 import static org.bytedeco.javacpp.opencv_core.cvAvg;
 
-import java.util.Scanner;
+import java.awt.Color;
 
 import org.bytedeco.javacpp.opencv_core.CvRect;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
@@ -37,16 +37,6 @@ public class ColorDetector implements Runnable {
 
 	public ColorDetector() {
 
-		Scanner in = new Scanner(System.in);
-
-		while (!s.equals("red") && !s.equals("blue") && !s.equals("green")) {
-
-			System.out.println("Which colour would you like to detect?");
-			s = in.nextLine().toLowerCase();
-			System.out.println("You entered " + s);
-		}
-		in.close();
-
 		getThresholdedImage(s);
 
 	}
@@ -54,43 +44,35 @@ public class ColorDetector implements Runnable {
 	void getThresholdedImage(String s) {
 
 		String filename = "";
+		int size = 15; // size of the rectangle
+		int range = 40; // range of colors
 
 		// filename = "ColorFades.jpg";
 		// filename = "ColorWall.jpg";
 		filename = "Pixels.jpg";
+		// filename = "Points.jpg";
 		// filename = "Rainbow.jpg";
 		// filename = "RGB.jpg";
 		// filename = "Wheel.jpg";
 
 		IplImage orgImg = cvLoadImage(filename);
 
-		//gets the mean of the upper-left corner of the Image
-		mean(orgImg, 0, 0, 15, 15);
-		
+		// gets the mean of the upper-left corner of the Image
+		CvScalar mean = mean(orgImg, 0, 0, size, size);
+
+		Color c_min = minColor(range, mean);
+		Color c_max = maxColor(range, mean);
+
+		System.out.println(c_min + " " + mean + " " + c_max);
+
 		IplImage imgThreshold = cvCreateImage(cvGetSize(orgImg), 8, 1);
-		// apply thresholding
 
-		if (s.equals("red")) {
+		CvScalar min = cvScalar(c_min.getBlue(), c_min.getGreen(),
+				c_min.getRed(), 0);
+		CvScalar max = cvScalar(c_max.getBlue(), c_max.getGreen(),
+				c_max.getRed(), 0);
 
-			CvScalar red_min = cvScalar(0, 0, 130, 0);
-			CvScalar red_max = cvScalar(80, 80, 255, 0);
-			cvInRangeS(orgImg, red_min, red_max, imgThreshold);// red
-
-		}
-
-		if (s.equals("blue")) {
-
-			CvScalar blue_min = cvScalar(130, 0, 0, 0);
-			CvScalar blue_max = cvScalar(255, 80, 80, 0);
-			cvInRangeS(orgImg, blue_min, blue_max, imgThreshold);// blue
-		}
-		if (s.equals("green")) {
-
-			CvScalar green_min = cvScalar(0, 130, 0, 0);
-			CvScalar green_max = cvScalar(80, 255, 80, 0);
-			cvInRangeS(orgImg, green_min, green_max, imgThreshold);// green
-		}
-
+		cvInRangeS(orgImg, min, max, imgThreshold);
 		cvSmooth(imgThreshold, imgThreshold, CV_MEDIAN, 15, 0, 0, 0);
 		cvSaveImage("thr_" + filename, imgThreshold);
 		System.out.println("DONE");
@@ -106,8 +88,35 @@ public class ColorDetector implements Runnable {
 		cvSetImageROI(orgImg, cvRect(x, y, width, height));
 		CvScalar c = cvAvg(orgImg);
 		cvSetImageROI(orgImg, old_roi); // reset old roi
-		//System.out.println(c);
+		// System.out.println(c);
 		return c;
 
+	}
+
+	Color minColor(int range, CvScalar c) {
+		int min_r = (int) (c.red() + (int) (Math.random() / 2 * range - range));
+		min_r = Math.min(255, Math.max(0, min_r));
+
+		int min_g = (int) (c.green() + (int) (Math.random() / 2 * range - range));
+		min_g = Math.min(255, Math.max(0, min_g));
+
+		int min_b = (int) (c.blue() + (int) (Math.random() / 2 * range - range));
+		min_b = Math.min(255, Math.max(0, min_b));
+
+		return new Color(min_r, min_g, min_b);
+	}
+
+	Color maxColor(int range, CvScalar c) {
+
+		int max_r = (int) (c.red() + (int) (Math.random() * 2 * range + range));
+		max_r = Math.min(255, Math.max(0, max_r));
+
+		int max_g = (int) (c.green() + (int) (Math.random() * 2 * range + range));
+		max_g = Math.min(255, Math.max(0, max_g));
+
+		int max_b = (int) (c.blue() + (int) (Math.random() * 2 * range + range));
+		max_b = Math.min(255, Math.max(0, max_b));
+
+		return new Color(max_r, max_g, max_b);
 	}
 }

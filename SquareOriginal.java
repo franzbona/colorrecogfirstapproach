@@ -10,7 +10,7 @@ import static org.bytedeco.javacpp.opencv_highgui.*;
 
 public class SquareOriginal {
 
-    int thresh = 5;
+    int thresh = 50;
     IplImage img = null;
     IplImage img0 = null;
     CvMemStorage storage = null;
@@ -37,7 +37,7 @@ public class SquareOriginal {
     CvSeq findSquares4(IplImage img, CvMemStorage storage) {
         // Java translation: moved into loop
         // CvSeq contours = new CvSeq();
-        int i, c, l, N = 11;
+        int i, c, l, N = 500;
         CvSize sz = cvSize(img.width() & -2, img.height() & -2);
         IplImage timg = cvCloneImage(img); // make a copy of input image
         IplImage gray = cvCreateImage(sz, 8, 1);
@@ -238,7 +238,7 @@ public class SquareOriginal {
         // create memory storage that will contain all the dynamic data
         storage = cvCreateMemStorage(0);
         
-            img0 = cvLoadImage("Pixels.jpg", 1);
+            img0 = cvLoadImage("thr_Pixels.jpg", 1);
             System.out.println(img0);
             
             img = cvCloneImage(img0);

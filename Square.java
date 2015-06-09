@@ -27,7 +27,7 @@ public class Square {
 		// filename = "thr_ColorFades.jpg";
 		// filename = "thr_ColorWall.jpg";
 		// filename = "thr_Pixels.jpg";
-		// filename = "thr_Points.jpg";
+		filename = "thr_Points.jpg";
 		// filename = "thr_Rainbow.jpg";
 		// filename = "thr_RGB.jpg";
 		// filename = "thr_Wheel.jpg";
@@ -38,8 +38,6 @@ public class Square {
 		// find and draw the squares
 		drawSquares(img, findSquares4(img, storage));
 
-		cvReleaseImage(img);
-		cvReleaseImage(orgImg);
 		// clear memory storage - reset free space position
 		cvClearMemStorage(storage);
 	}
@@ -92,8 +90,6 @@ public class Square {
 
 			// try several threshold levels
 			for (l = 0; l < N; l++) {
-				// hack: use Canny instead of zero threshold level.
-				// Canny helps to catch squares with gradient shading
 				if (l == 0) {
 					// apply Canny. Take the upper threshold from slider
 					// and set the lower to 0 (which forces edges merging)
@@ -125,12 +121,8 @@ public class Square {
 							CV_POLY_APPROX_DP,
 							cvContourPerimeter(contours) * 0.02, 0);
 					// square contours should have 4 vertices after
-					// approximation
-					// relatively large area (to filter out noisy contours)
-					// and be convex.
-					// Note: absolute value of an area is used because
-					// area may be positive or negative - in accordance with the
-					// contour orientation
+					// approximation relatively large area
+					// (to filter out noisy contours) and be convex.
 					if (result.total() == 4
 							&& Math.abs(cvContourArea(result, CV_WHOLE_SEQ, 0)) > 1000
 							&& cvCheckContourConvexity(result) != 0) {
@@ -142,27 +134,6 @@ public class Square {
 							// find minimum angle between joint
 							// edges (maximum of cosine)
 							if (i >= 2) {
-								// Java translation:
-								// Comment from the HoughLines.java sample code:
-								// " Based on JavaCPP, the equivalent of the C
-								// code:
-								// CvPoint* line =
-								// (CvPoint*)cvGetSeqElem(lines,i);
-								// CvPoint first=line[0];
-								// CvPoint second=line[1];
-								// is:
-								// Pointer line = cvGetSeqElem(lines, i);
-								// CvPoint first = new
-								// CvPoint(line).position(0);
-								// CvPoint second = new
-								// CvPoint(line).position(1);
-								// "
-								// ... so after some trial and error this seem
-								// to work
-								// t = fabs(angle(
-								// (CvPoint*)cvGetSeqElem( result, i ),
-								// (CvPoint*)cvGetSeqElem( result, i-2 ),
-								// (CvPoint*)cvGetSeqElem( result, i-1 )));
 								t = Math.abs(angle(
 										new CvPoint(cvGetSeqElem(result, i)),
 										new CvPoint(cvGetSeqElem(result, i - 2)),
@@ -186,13 +157,8 @@ public class Square {
 			}
 		}
 
-		// release all the temporary images
-		cvReleaseImage(gray);
-		cvReleaseImage(pyr);
-		cvReleaseImage(tgray);
-		cvReleaseImage(timg);
-
 		return squares;
+
 	}
 
 	// the function draws all the squares in the image
@@ -216,15 +182,12 @@ public class Square {
 					.end_index(i + 4));
 
 			// draw the square as a closed polyline
-			// Java translation: gotcha (re-)setting the opening "position" of
-			// the CvPoint sequence thing
 			cvPolyLine(cpy, rect.position(0), count, 1, 1, CV_RGB(0, 255, 0),
 					3, CV_AA, 0);
 		}
 
 		finImg = cvCreateImage(cvGetSize(orgImg), 8, 1);
 		cvSaveImage("rect_" + filename, finImg);
-		cvReleaseImage(cpy);
 	}
 
 }

@@ -24,13 +24,14 @@ public class Square {
 		// create memory storage that will contain all the dynamic data
 		storage = cvCreateMemStorage(0);
 
-		// filename = "thr_ColorFades.jpg";
-		// filename = "thr_ColorWall.jpg";
-		// filename = "thr_Pixels.jpg";
-		filename = "thr_Points.jpg";
-		// filename = "thr_Rainbow.jpg";
-		// filename = "thr_RGB.jpg";
-		// filename = "thr_Wheel.jpg";
+		// filename = "ColorFades.jpg";
+		// filename = "ColorWall.jpg";
+		filename = "Pixels.jpg";
+		// filename = "Squares.jpg";
+		// filename = "Points.jpg";
+		// filename = "Rainbow.jpg";
+		// filename = "RGB.jpg";
+		// filename = "Wheel.jpg";
 
 		orgImg = cvLoadImage(filename);
 		img = cvCloneImage(orgImg);
@@ -187,7 +188,7 @@ public class Square {
 		}
 
 		finImg = cvCreateImage(cvGetSize(orgImg), 8, 1);
-		cvSaveImage("rect_" + filename, finImg);
+		cvSaveImage("thr_" + filename, finImg);
 	}
 
 }

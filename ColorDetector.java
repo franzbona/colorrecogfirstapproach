@@ -47,8 +47,8 @@ public class ColorDetector implements Runnable {
 
 		// filename = "ColorFades.jpg";
 		// filename = "ColorWall.jpg";
-		filename = "Pixels.jpg";
-		// filename = "Squares.jpg";
+		// filename = "Pixels.jpg";
+		filename = "Squares.jpg";
 		// filename = "Points.jpg";
 		// filename = "Rainbow.jpg";
 		// filename = "RGB.jpg";
@@ -57,7 +57,7 @@ public class ColorDetector implements Runnable {
 		IplImage orgImg = cvLoadImage(filename);
 
 		// gets the mean of the upper-left corner of the Image
-		CvScalar mean = mean(orgImg, 0, 0, size, size);
+		CvScalar mean = mean(orgImg, 50, 50, size, size);
 
 		IplImage imgThreshold = cvCreateImage(cvGetSize(orgImg), 8, 1);
 

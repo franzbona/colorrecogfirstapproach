@@ -48,6 +48,7 @@ public class ColorDetector implements Runnable {
 		// filename = "ColorFades.jpg";
 		// filename = "ColorWall.jpg";
 		filename = "Pixels.jpg";
+		// filename = "Squares.jpg";
 		// filename = "Points.jpg";
 		// filename = "Rainbow.jpg";
 		// filename = "RGB.jpg";

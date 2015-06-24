@@ -37,15 +37,12 @@ public class SquareOriginal {
     CvSeq findSquares4(IplImage img, CvMemStorage storage) {
         // Java translation: moved into loop
         // CvSeq contours = new CvSeq();
-        int i, c, l, N = 500;
+        int i, c, l, N = 50;
         CvSize sz = cvSize(img.width() & -2, img.height() & -2);
         IplImage timg = cvCloneImage(img); // make a copy of input image
         IplImage gray = cvCreateImage(sz, 8, 1);
         IplImage pyr = cvCreateImage(cvSize(sz.width()/2, sz.height()/2), 8, 3);
         IplImage tgray = null;
-        // Java translation: moved into loop
-        // CvSeq result = null;
-        // double s = 0.0, t = 0.0;
 
         // create empty sequence that will contain points -
         // 4 points per square (the square's vertices)
@@ -92,7 +89,6 @@ public class SquareOriginal {
                 while (contours != null && !contours.isNull()) {
                     // approximate contour with accuracy proportional
                     // to the contour perimeter
-                    // Java translation: moved into the loop
                     CvSeq result = cvApproxPoly(contours, Loader.sizeof(CvContour.class), storage, CV_POLY_APPROX_DP, cvContourPerimeter(contours)*0.02, 0);
                     // square contours should have 4 vertices after approximation
                     // relatively large area (to filter out noisy contours)
@@ -102,29 +98,12 @@ public class SquareOriginal {
                     // contour orientation
                     if(result.total() == 4 && Math.abs(cvContourArea(result, CV_WHOLE_SEQ, 0)) > 1000 && cvCheckContourConvexity(result) != 0) {
 
-                        // Java translation: moved into loop
                         double s = 0.0, t = 0.0;
 
                         for( i = 0; i < 5; i++ ) {
                             // find minimum angle between joint
                             // edges (maximum of cosine)
                             if( i >= 2 ) {
-                                //      Java translation:
-                                //          Comment from the HoughLines.java sample code:
-                                //          "    Based on JavaCPP, the equivalent of the C code:
-                                //                  CvPoint* line = (CvPoint*)cvGetSeqElem(lines,i);
-                                //                  CvPoint first=line[0];
-                                //                  CvPoint second=line[1];
-                                //          is:
-                                //                  Pointer line = cvGetSeqElem(lines, i);
-                                //                  CvPoint first = new CvPoint(line).position(0);
-                                //                  CvPoint second = new CvPoint(line).position(1);
-                                //          "
-                                //          ... so after some trial and error this seem to work
-//                                t = fabs(angle(
-//                                        (CvPoint*)cvGetSeqElem( result, i ),
-//                                        (CvPoint*)cvGetSeqElem( result, i-2 ),
-//                                        (CvPoint*)cvGetSeqElem( result, i-1 )));
                                 t = Math.abs(angle(new CvPoint(cvGetSeqElem(result, i)),
                                         new CvPoint(cvGetSeqElem(result, i-2)),
                                         new CvPoint(cvGetSeqElem(result, i-1))));
@@ -159,66 +138,21 @@ public class SquareOriginal {
     // the function draws all the squares in the image
     void drawSquares(IplImage img, CvSeq squares) {
 
-        //      Java translation: Here the code is somewhat different from the C version.
-        //      I was unable to get straight forward CvPoint[] arrays
-        //      working with "reader" and the "CV_READ_SEQ_ELEM".
-
-//        CvSeqReader reader = new CvSeqReader();
-
         IplImage cpy = cvCloneImage(img);
         int i = 0;
 
-        // Used by attempt 3
-        // Create a "super"-slice, consisting of the entire sequence of squares
         CvSlice slice = new CvSlice(squares);
-
-        // initialize reader of the sequence
-//        cvStartReadSeq(squares, reader, 0);
 
          // read 4 sequence elements at a time (all vertices of a square)
          for(i = 0; i < squares.total(); i += 4) {
 
-//              // Attempt 1:
-//              // This does not work, uses the "reader"
-//              CvPoint pt[] = new CvPoint[]{new CvPoint(1), new CvPoint(1), new CvPoint(1), new CvPoint(1)};
-//              PointerPointer rect = new PointerPointer(pt);
-//              int count[] = new int[]{4};
-//
-//              CV_READ_SEQ_ELEM(pt[0], reader);
-//              CV_READ_SEQ_ELEM(pt[1], reader);
-//              CV_READ_SEQ_ELEM(pt[2], reader);
-//              CV_READ_SEQ_ELEM(pt[3], reader);
-
-//              // Attempt 2:
-//              // This works, somewhat similar to the C code, somewhat messy, does not use the "reader"
-//              CvPoint pt[] = new CvPoint[]{
-//                      new CvPoint(cvGetSeqElem(squares, i)),
-//                      new CvPoint(cvGetSeqElem(squares, i + 1)),
-//                      new CvPoint(cvGetSeqElem(squares, i + 2)),
-//                      new CvPoint(cvGetSeqElem(squares, i + 3))};
-//              PointerPointer rect = new PointerPointer(pt);
-//              int count[] = new int[]{4};
-
-              // Attempt 3:
-              // This works, may be the "cleanest" solution, does not use the "reader"
+        	 // This works, may be the "cleanest" solution, does not use the "reader"
              CvPoint rect = new CvPoint(4);
              IntPointer count = new IntPointer(1).put(4);
              // get the 4 corner slice from the "super"-slice
              cvCvtSeqToArray(squares, rect, slice.start_index(i).end_index(i + 4));
 
-//             // Attempt 4:
-//             // This works, and look the most like the original C code, uses the "reader"
-//             CvPoint rect = new CvPoint(4);
-//             int count[] = new int[]{4};
-//
-//             // read 4 vertices
-//             CV_READ_SEQ_ELEM(rect.position(0), reader);
-//             CV_READ_SEQ_ELEM(rect.position(1), reader);
-//             CV_READ_SEQ_ELEM(rect.position(2), reader);
-//             CV_READ_SEQ_ELEM(rect.position(3), reader);
-
              // draw the square as a closed polyline
-             // Java translation: gotcha (re-)setting the opening "position" of the CvPoint sequence thing
              cvPolyLine(cpy, rect.position(0), count, 1, 1, CV_RGB(0,255,0), 3, CV_AA, 0);
          }
 
@@ -238,9 +172,7 @@ public class SquareOriginal {
         // create memory storage that will contain all the dynamic data
         storage = cvCreateMemStorage(0);
         
-            img0 = cvLoadImage("thr_Pixels.jpg", 1);
-            System.out.println(img0);
-            
+            img0 = cvLoadImage("thr_Pixels.jpg", 1);            
             img = cvCloneImage(img0);
 
             // create window and a trackbar (slider) with parent "image" and set callback

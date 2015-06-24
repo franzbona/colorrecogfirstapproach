@@ -1,12 +1,16 @@
+/*
+ * Using JavaCV to detect the squares in an image
+ * SOURCE: https://www.digitalinferno.com/wiki/attach/JavaCVSquareDetector/Square.java
+ */
+
 import org.bytedeco.javacpp.*;
 import org.bytedeco.javacpp.opencv_core.IplImage;
-import org.bytedeco.javacv.*;
 
 import static org.bytedeco.javacpp.opencv_core.*;
 import static org.bytedeco.javacpp.opencv_imgproc.*;
 import static org.bytedeco.javacpp.opencv_highgui.*;
 
-public class SquareOriginal {
+public class SquareDetector {
 
 	int thresh = 50;
 	IplImage img = null;
@@ -33,6 +37,7 @@ public class SquareOriginal {
 	// the sequence is stored in the specified memory storage
 	CvSeq findSquares4(IplImage img, CvMemStorage storage) {
 
+		//N = 1 at the moment - original was 11 - I put 50
 		int i, c, l, N = 50;
 		CvSize sz = cvSize(img.width() & -2, img.height() & -2);
 		IplImage timg = cvCloneImage(img); // make a copy of input image
@@ -155,7 +160,7 @@ public class SquareOriginal {
 			// get the 4 corner slice from the "super"-slice
 			cvCvtSeqToArray(squares, rect, slice.start_index(i)
 					.end_index(i + 4));
-
+			
 			// draw the square as a closed polyline
 			cvPolyLine(cpy, rect.position(0), count, 1, 1, CV_RGB(255, 0, 0),
 					2, CV_AA, 0);
@@ -169,7 +174,7 @@ public class SquareOriginal {
 	}
 
 	public static void main(String args[]) {
-		new SquareOriginal().main();
+		new SquareDetector().main();
 	}
 
 	public void main() {
@@ -179,8 +184,8 @@ public class SquareOriginal {
 
 		// filename = "thr_ColorFades.jpg";
 		// filename = "thr_ColorWall.jpg";
-		// filename = "thr_Pixels.jpg";
-		filename = "thr_Squares.jpg";
+		filename = "thr_Pixels.jpg";
+		// filename = "thr_Squares.jpg";
 		// filename = "thr_Points.jpg";
 		// filename = "thr_Rainbow.jpg";
 		// filename = "thr_RGB.jpg";

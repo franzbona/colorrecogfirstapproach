@@ -57,7 +57,7 @@ public class ColorDetector implements Runnable {
 		IplImage orgImg = cvLoadImage(filename);
 
 		// gets the mean of the upper-left corner of the Image
-		CvScalar mean = mean(orgImg, 50, 50, size, size);
+		CvScalar mean = mean(orgImg, 0, 0, size, size);
 
 		IplImage imgThreshold = cvCreateImage(cvGetSize(orgImg), 8, 1);
 

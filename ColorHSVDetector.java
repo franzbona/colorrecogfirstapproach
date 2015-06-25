@@ -13,11 +13,13 @@ import static org.bytedeco.javacpp.opencv_imgproc.CV_MEDIAN;
 import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2HSV;
 import static org.bytedeco.javacpp.opencv_imgproc.cvSmooth;
+
+import java.util.Scanner;
+
 import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class ColorHSVDetector implements Runnable {
 
-	String s = "";
 	int i = 0;
 	double iLowH;
 	double iHighH;
@@ -33,71 +35,69 @@ public class ColorHSVDetector implements Runnable {
 
 	public ColorHSVDetector() {
 
-		// let's detect the 6 basic colors based on the HUE values:
+		String s = "";
+		Scanner in = new Scanner(System.in);
 
-		//for (i = 0; i < 7; i++) {
+		while (s.isEmpty()) {
 
-		//violet
-		i = 5;	
-		getThresholdedImage(s, i);
+			System.out.println("Which colour would you like to detect?");
+			s = in.nextLine().toLowerCase();
+			System.out.println("You entered " + s);
+		}
+		in.close();
 
-		//}
-	}
+		switch (s) {
 
-	void getThresholdedImage(String s, int i) {
-
-		String filename = "";
-
-		// filename = "ColorFades.jpg";
-		// filename = "ColorWall.jpg";
-		// filename = "Pixels.jpg";
-		filename = "Phone.jpg";
-		// filename = "Squares.jpg";
-		// filename = "Points.jpg";
-		// filename = "Rainbow.jpg";
-		// filename = "RGB.jpg";
-		// filename = "Wheel.jpg";
-
-		IplImage orgImg = cvLoadImage(filename);
-
-		switch (i) {
-
-		// orange
-		case 0:
+		case "orange":
 			iLowH = 0;
 			iHighH = 22;
 			break;
-		// yellow
-		case 1:
+		case "yellow":
 			iLowH = 22;
 			iHighH = 38;
 			break;
-		// green
-		case 2:
+		case "green":
 			iLowH = 38;
 			iHighH = 75;
 			break;
-		// light blue
-		case 3:
+		case "light blue":
 			iLowH = 75;
 			iHighH = 100;
 			break;
-		// blue
-		case 4:
+		case "blue":
 			iLowH = 100;
 			iHighH = 130;
 			break;
-		// violet
-		case 5:
+		case "violet":
 			iLowH = 130;
 			iHighH = 160;
 			break;
-		// red
-		case 6:
+		case "red":
 			iLowH = 160;
 			iHighH = 179;
 			break;
+		default:
+			iLowH = 0;
+			iHighH = 0;
 		}
+
+		getThresholdedImage(iLowH, iHighH);
+
+		// }
+	}
+
+	void getThresholdedImage(double iLowH, double iHighH) {
+
+		String filename = "";
+		
+		// filename = "ColorFades.jpg";
+		// filename = "ColorWall.jpg";
+		filename = "Phone.jpg";
+		// filename = "Pixels.jpg";
+		// filename = "Points.jpg";
+		// filename = "Squares.jpg";
+
+		IplImage orgImg = cvLoadImage(filename);
 
 		double iLowS = 1;
 		double iHighS = 254;
@@ -114,7 +114,7 @@ public class ColorHSVDetector implements Runnable {
 		cvInRangeS(imgHSV, cvScalar(iLowH, iLowS, iLowV, 0),
 				cvScalar(iHighH, iHighS, iHighV, 0), imgThreshold);
 		cvSmooth(imgThreshold, imgThreshold, CV_MEDIAN, 15, 0, 0, 0);
-		cvSaveImage("thr_" + filename, imgThreshold);
+		cvSaveImage("HSV_" + filename, imgThreshold);
 		System.out.println("DONE");
 	}
 

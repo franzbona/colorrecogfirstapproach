@@ -22,7 +22,6 @@ import org.bytedeco.javacpp.opencv_core.IplImage;
 
 public class ColorDetector implements Runnable {
 
-	String s = "";
 	IplImage img;
 
 	public static void main(String[] args) {
@@ -35,11 +34,11 @@ public class ColorDetector implements Runnable {
 
 	public ColorDetector() {
 
-		getThresholdedImage(s);
+		getThresholdedImage();
 
 	}
 
-	void getThresholdedImage(String s) {
+	void getThresholdedImage() {
 
 		String filename = "";
 		int size = 15; // size of the rectangle
@@ -47,13 +46,10 @@ public class ColorDetector implements Runnable {
 
 		// filename = "ColorFades.jpg";
 		// filename = "ColorWall.jpg";
-		// filename = "Pixels.jpg";
 		filename = "Phone.jpg";
-		// filename = "Squares.jpg";
+		// filename = "Pixels.jpg";
 		// filename = "Points.jpg";
-		// filename = "Rainbow.jpg";
-		// filename = "RGB.jpg";
-		// filename = "Wheel.jpg";
+		// filename = "Squares.jpg";
 
 		IplImage orgImg = cvLoadImage(filename);
 
@@ -69,7 +65,7 @@ public class ColorDetector implements Runnable {
 
 		cvInRangeS(orgImg, min, max, imgThreshold);
 		cvSmooth(imgThreshold, imgThreshold, CV_MEDIAN, 15, 0, 0, 0);
-		cvSaveImage("thr_" + filename, imgThreshold);
+		cvSaveImage("THR_" + filename, imgThreshold);
 		System.out.println("DONE");
 	}
 

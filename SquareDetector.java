@@ -9,9 +9,6 @@ import org.bytedeco.javacpp.opencv_core.IplImage;
 import static org.bytedeco.javacpp.opencv_core.*;
 import static org.bytedeco.javacpp.opencv_imgproc.*;
 import static org.bytedeco.javacpp.opencv_highgui.*;
-import static org.bytedeco.javacpp.opencv_core.cvRectangle;
-import static org.bytedeco.javacpp.opencv_objdetect.groupRectangles;
-
 
 public class SquareDetector {
 
@@ -151,13 +148,11 @@ public class SquareDetector {
 		IplImage cpy = cvCloneImage(img);
 		int i = 0;
 
-		
 		CvSlice slice = new CvSlice(squares);
 
 		// read 4 sequence elements at a time (all vertices of a square)
 		for (i = 0; i < squares.total(); i += 4) {
 
-			
 			// This works, may be the "cleanest" solution, does not use the
 			// "reader"
 			CvPoint rect = new CvPoint(4);
@@ -170,28 +165,26 @@ public class SquareDetector {
 			tl.x(rect.position(0).x());
 			tl.y(rect.position(0).y());
 			System.out.println(tl);
-			
+
 			CvPoint tr = new CvPoint();
 			tr.x(rect.position(1).x());
 			tr.y(rect.position(1).y());
 			System.out.println(tr);
-			
+
 			CvPoint br = new CvPoint();
 			br.x(rect.position(2).x());
 			br.y(rect.position(2).y());
 			System.out.println(br);
-			
+
 			CvPoint bl = new CvPoint();
 			bl.x(rect.position(3).x());
 			bl.y(rect.position(3).y());
 			System.out.println(bl);
 			System.out.println();
-						
-			cvRectangle(cpy, tl, br,
-					CV_RGB(255, 0, 0), 1, CV_AA, 0);
-			
-			
-			//draw the square as a closed polyline
+
+			cvRectangle(cpy, tl, br, CV_RGB(255, 0, 0), 1, CV_AA, 0);
+
+			// draw the square as a closed polyline
 			cvPolyLine(cpy, rect.position(0), count, 1, 1, CV_RGB(0, 255, 0),
 					2, CV_AA, 0);
 
@@ -213,15 +206,12 @@ public class SquareDetector {
 		// create memory storage that will contain all the dynamic data
 		storage = cvCreateMemStorage(0);
 
-		// filename = "thr_ColorFades.jpg";
-		// filename = "thr_ColorWall.jpg";
-		// filename = "thr_Pixels.jpg";
-		// filename = "thr_Phone.jpg";
-		filename = "thr_Squares.jpg";
-		// filename = "thr_Points.jpg";
-		// filename = "thr_Rainbow.jpg";
-		// filename = "thr_RGB.jpg";
-		// filename = "thr_Wheel.jpg";
+		// filename = "ColorFades.jpg";
+		// filename = "ColorWall.jpg";
+		filename = "Phone.jpg";
+		// filename = "Pixels.jpg";
+		// filename = "Points.jpg";
+		// filename = "Squares.jpg";
 
 		img0 = cvLoadImage(filename, 1);
 		img = cvCloneImage(img0);

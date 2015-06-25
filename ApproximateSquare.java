@@ -1,4 +1,8 @@
+import java.util.Scanner;
+
 import org.bytedeco.javacpp.*;
+import org.bytedeco.javacpp.opencv_core.CvRect;
+import org.bytedeco.javacpp.opencv_core.CvScalar;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 
 import static org.bytedeco.javacpp.opencv_core.*;
@@ -7,166 +11,75 @@ import static org.bytedeco.javacpp.opencv_highgui.*;
 
 public class ApproximateSquare {
 
-	int thresh = 50;
-	IplImage img = null;
-	IplImage img0 = null;
-	IplImage finImg = null;
-	CvMemStorage storage = null;
+	double iLowH;
+	double iHighH;
 	String filename = "";
-
-	// helper function:
-	// finds a cosine of angle between vectors
-	// from pt0->pt1 and from pt0->pt2
-	double angle(CvPoint pt1, CvPoint pt2, CvPoint pt0) {
-		double dx1 = pt1.x() - pt0.x();
-		double dy1 = pt1.y() - pt0.y();
-		double dx2 = pt2.x() - pt0.x();
-		double dy2 = pt2.y() - pt0.y();
-
-		return (dx1 * dx2 + dy1 * dy2)
-				/ Math.sqrt((dx1 * dx1 + dy1 * dy1) * (dx2 * dx2 + dy2 * dy2)
-						+ 1e-10);
-	}
+	IplImage finImg;
+	IplImage orgImg;
 
 	// returns sequence of squares detected on the image.
 	// the sequence is stored in the specified memory storage
-	CvSeq findSquares4(IplImage img, CvMemStorage storage) {
+	void findSquares4(IplImage img, CvMemStorage storage) {
 
-		//N = 1 at the moment - original was 11 - I put 50
-		int i, c, l, N = 1;
-		CvSize sz = cvSize(img.width() & -2, img.height() & -2);
-		IplImage timg = cvCloneImage(img); // make a copy of input image
-		IplImage gray = cvCreateImage(sz, 8, 1);
-		IplImage pyr = cvCreateImage(cvSize(sz.width() / 2, sz.height() / 2),
-				8, 3);
-		IplImage tgray = null;
+		IplImage cpy = cvLoadImage(filename);
 
-		// create empty sequence that will contain points -
-		// 4 points per square (the square's vertices)
-		CvSeq squares = cvCreateSeq(0, Loader.sizeof(CvSeq.class),
-				Loader.sizeof(CvPoint.class), storage);
+		CvSize cvSize = cvSize(img.width(), img.height());
+		IplImage gry = cvCreateImage(cvSize, img.depth(), 1);
+		cvCvtColor(img, gry, CV_BGR2GRAY);
+		cvThreshold(gry, gry, 200, 255, CV_THRESH_BINARY);
+		cvAdaptiveThreshold(gry, gry, 255, CV_ADAPTIVE_THRESH_MEAN_C,
+				CV_THRESH_BINARY_INV, 11, 5);
 
-		// select the maximum ROI in the image
-		// with the width and height divisible by 2
-		cvSetImageROI(timg, cvRect(0, 0, sz.width(), sz.height()));
+		CvSeq contours = new CvContour(null);
+		int noOfContors = cvFindContours(gry, storage, contours,
+				Loader.sizeof(CvContour.class), CV_RETR_CCOMP,
+				CV_CHAIN_APPROX_NONE, new CvPoint());
+		CvSeq ptr = new CvSeq();
 
-		// down-scale and upscale the image to filter out the noise
-		cvPyrDown(timg, pyr, 7);
-		cvPyrUp(pyr, timg, 7);
-		tgray = cvCreateImage(sz, 8, 1);
+		int count = 1;
 
-		// find squares in every color plane of the image
-		for (c = 0; c < 3; c++) {
-			// extract the c-th color plane
-			cvSetImageCOI(timg, c + 1);
-			cvCopy(timg, tgray);
+		for (ptr = contours; ptr != null; ptr = ptr.h_next()) {
 
-			// try several threshold levels
-			for (l = 0; l < N; l++) {
-				// hack: use Canny instead of zero threshold level.
-				// Canny helps to catch squares with gradient shading
-				if (l == 0) {
-					// apply Canny. Take the upper threshold from slider
-					// and set the lower to 0 (which forces edges merging)
-					cvCanny(tgray, gray, 0, thresh, 5);
-					// dilate canny output to remove potential
-					// holes between edge segments
-					cvDilate(gray, gray, null, 1);
-				} else {
-					// apply threshold if l!=0:
-					// tgray(x,y) = gray(x,y) < (l+1)*255/N ? 255 : 0
-					cvThreshold(tgray, gray, (l + 1) * 255 / N, 255,
-							CV_THRESH_BINARY);
-				}
+			CvScalar color = CvScalar.BLUE;
+			cvDrawContours(cpy, ptr, color, CV_RGB(0, 0, 0), -1, CV_FILLED, 8,
+					cvPoint(0, 0));
 
-				// find contours and store them all as a list
-				// Java translation: moved into the loop
-				CvSeq contours = new CvSeq();
-				cvFindContours(gray, storage, contours,
-						Loader.sizeof(CvContour.class), CV_RETR_LIST,
-						CV_CHAIN_APPROX_SIMPLE, cvPoint(0, 0));
+			CvRect sq = cvBoundingRect(ptr, 0);
 
-				// test each contour
-				while (contours != null && !contours.isNull()) {
-					// approximate contour with accuracy proportional
-					// to the contour perimeter
-					CvSeq result = cvApproxPoly(contours,
-							Loader.sizeof(CvContour.class), storage,
-							CV_POLY_APPROX_DP,
-							cvContourPerimeter(contours) * 0.02, 0);
+			if ((sq.height() > 5) && (sq.width() > 5)) {
 
-					if (result.total() == 4
-							&& Math.abs(cvContourArea(result, CV_WHOLE_SEQ, 0)) > 1000
-							&& cvCheckContourConvexity(result) != 0) {
+				CvPoint tl = new CvPoint();
+				tl.x(sq.x());
+				tl.y(sq.y());
 
-						double s = 0.0, t = 0.0;
+				CvPoint tr = new CvPoint();
+				tr.x(sq.x() + sq.width());
+				tr.y(sq.y());
 
-						for (i = 0; i < 5; i++) {
-							// find minimum angle between joint
-							// edges (maximum of cosine)
-							if (i >= 2) {
-								t = Math.abs(angle(
-										new CvPoint(cvGetSeqElem(result, i)),
-										new CvPoint(cvGetSeqElem(result, i - 2)),
-										new CvPoint(cvGetSeqElem(result, i - 1))));
-								s = s > t ? s : t;
-							}
-						}
+				CvPoint br = new CvPoint();
+				br.x(sq.x() + sq.width());
+				br.y(sq.y() + sq.height());
 
-						// if cosines of all angles are small
-						// (all angles are ~90 degree) then write quandrange
-						// vertices to resultant sequence
-						if (s < 0.3)
-							for (i = 0; i < 4; i++) {
-								cvSeqPush(squares, cvGetSeqElem(result, i));
-							}
-					}
+				CvPoint bl = new CvPoint();
+				bl.x(sq.x());
+				bl.y(sq.y() + sq.height());
 
-					// take the next contour
-					contours = contours.h_next();
-				}
+				System.out.println("Contour " + count);
+				System.out.println("Coordinates: " + tl + tr + br + bl);
+				System.out.println("");
+
+				cvRectangle(cpy, tl, br, CV_RGB(255, 0, 0), 2, 8, 0);
+				count++;
 			}
 		}
 
-		// release all the temporary images
-		cvReleaseImage(gray);
-		cvReleaseImage(pyr);
-		cvReleaseImage(tgray);
-		cvReleaseImage(timg);
-
-		return squares;
-	}
-
-	// the function draws all the squares in the image
-	void drawSquares(IplImage img, CvSeq squares) {
-
-		IplImage cpy = cvCloneImage(img);
-		int i = 0;
-
-		CvSlice slice = new CvSlice(squares);
-		System.out.println(squares.total());
-
-		// read 4 sequence elements at a time (all vertices of a square)
-		for (i = 0; i < squares.total(); i += 4) {
-
-			// This works, may be the "cleanest" solution, does not use the
-			// "reader"
-			CvPoint rect = new CvPoint(4);
-			IntPointer count = new IntPointer(1).put(4);
-			// get the 4 corner slice from the "super"-slice
-			cvCvtSeqToArray(squares, rect, slice.start_index(i)
-					.end_index(i + 4));
-			
-			// draw the square as a closed polyline
-			cvPolyLine(cpy, rect.position(0), count, 1, 1, CV_RGB(255, 0, 0),
-					2, CV_AA, 0);
-		}
-
 		// saves the resultant image
-		finImg = cvCreateImage(cvGetSize(img0), 8, 3);
+		finImg = cvCreateImage(cvGetSize(orgImg), 8, 3);
 		cvSaveImage("R_" + filename, cpy);
 
 		cvReleaseImage(cpy);
+		cvReleaseImage(gry);
+
 	}
 
 	public static void main(String args[]) {
@@ -176,29 +89,105 @@ public class ApproximateSquare {
 	public void main() {
 
 		// create memory storage that will contain all the dynamic data
+		CvMemStorage storage = null;
 		storage = cvCreateMemStorage(0);
 
-		// filename = "thr_ColorFades.jpg";
-		// filename = "thr_ColorWall.jpg";
-		// filename = "thr_Pixels.jpg";
-		// filename = "Phone.jpg";
-		filename = "thr_Squares.jpg";
-		// filename = "thr_Points.jpg";
-		// filename = "thr_Rainbow.jpg";
-		// filename = "thr_RGB.jpg";
-		// filename = "thr_Wheel.jpg";
+		String s = "";
+		Scanner in = new Scanner(System.in);
 
-		img0 = cvLoadImage(filename, 1);
-		img = cvCloneImage(img0);
+		while (s.isEmpty()) {
+
+			System.out.println("Which colour would you like to detect?");
+			s = in.nextLine().toLowerCase();
+			System.out.println("You entered " + s);
+		}
+		in.close();
+
+		switch (s) {
+
+		case "orange":
+			iLowH = 0;
+			iHighH = 22;
+			break;
+		case "yellow":
+			iLowH = 22;
+			iHighH = 38;
+			break;
+		case "green":
+			iLowH = 38;
+			iHighH = 75;
+			break;
+		case "light blue":
+			iLowH = 75;
+			iHighH = 100;
+			break;
+		case "blue":
+			iLowH = 100;
+			iHighH = 130;
+			break;
+		case "violet":
+			iLowH = 130;
+			iHighH = 160;
+			break;
+		case "red":
+			iLowH = 160;
+			iHighH = 179;
+			break;
+		default:
+			iLowH = 0;
+			iHighH = 0;
+		}
+
+		// filename = "ColorFades.jpg";
+		// filename = "ColorWall.jpg";
+		filename = "Phone.jpg";
+		// filename = "Pixels.jpg";
+		// filename = "Points.jpg";
+		// filename = "Squares.jpg";
+
+		orgImg = cvLoadImage(filename);
+
+		double iLowS = 1;
+		double iHighS = 254;
+
+		double iLowV = 1;
+		double iHighV = 254;
+
+		IplImage imgHSV = cvCreateImage(cvGetSize(orgImg), 8, 3);
+		IplImage imgThresh = cvCreateImage(cvGetSize(orgImg), 8, 1);
+
+		cvCvtColor(orgImg, imgHSV, CV_BGR2HSV);
+
+		cvInRangeS(imgHSV, cvScalar(iLowH, iLowS, iLowV, 0),
+				cvScalar(iHighH, iHighS, iHighV, 0), imgThresh);
+		cvSmooth(imgThresh, imgThresh, CV_MEDIAN, 15, 0, 0, 0);
+
+		cvSaveImage("DIOCANE.jpg", imgThresh);
 
 		// find and draw the squares
-		drawSquares(img, findSquares4(img, storage));
 
-		// release both images
-		cvReleaseImage(img);
-		cvReleaseImage(img0);
+		IplImage newImg = cvLoadImage("DIOCANE.jpg");
+		findSquares4(newImg, storage);
+
+		// release images
+		cvReleaseImage(orgImg);
+		cvReleaseImage(imgThresh);
+		cvReleaseImage(imgHSV);
+		cvReleaseImage(newImg);
 		// clear memory storage - reset free space position
 		cvClearMemStorage(storage);
+
+	}
+
+	CvScalar mean(IplImage orgImg, int x, int y, int width, int height) {
+
+		// get current ROI so that the image's roi is not changed by calling
+		CvRect old_roi = cvGetImageROI(orgImg);
+		cvSetImageROI(orgImg, cvRect(x, y, width, height));
+		CvScalar c = cvAvg(orgImg);
+		cvSetImageROI(orgImg, old_roi); // reset old roi
+		// System.out.println(c);
+		return c;
 
 	}
 

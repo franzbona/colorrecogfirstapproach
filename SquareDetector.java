@@ -9,7 +9,7 @@ import org.bytedeco.javacpp.opencv_core.IplImage;
 import static org.bytedeco.javacpp.opencv_core.*;
 import static org.bytedeco.javacpp.opencv_imgproc.*;
 import static org.bytedeco.javacpp.opencv_highgui.*;
-import static org.bytedeco.javacpp.opencv_objdetect.*;
+import static org.bytedeco.javacpp.opencv_core.cvRectangle;
 
 public class SquareDetector {
 
@@ -182,11 +182,14 @@ public class SquareDetector {
 			bl.y(rect.position(3).y());
 			System.out.println(bl);
 			System.out.println();
+						
+			cvRectangle(cpy, bl, tr,
+					CV_RGB(255, 0, 0), 2, CV_AA, 0);
 			
 			
-			// draw the square as a closed polyline
-			cvPolyLine(cpy, rect.position(0), count, 1, 1, CV_RGB(255, 0, 0),
-					2, CV_AA, 0);
+//			// draw the square as a closed polyline
+//			cvPolyLine(cpy, rect.position(0), count, 1, 1, CV_RGB(255, 0, 0),
+//					2, CV_AA, 0);
 
 			// groupRectangles(rect.position(0), 1);
 

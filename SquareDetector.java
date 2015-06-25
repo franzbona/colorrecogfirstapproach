@@ -9,6 +9,7 @@ import org.bytedeco.javacpp.opencv_core.IplImage;
 import static org.bytedeco.javacpp.opencv_core.*;
 import static org.bytedeco.javacpp.opencv_imgproc.*;
 import static org.bytedeco.javacpp.opencv_highgui.*;
+import static org.bytedeco.javacpp.opencv_objdetect.*;
 
 public class SquareDetector {
 
@@ -37,8 +38,8 @@ public class SquareDetector {
 	// the sequence is stored in the specified memory storage
 	CvSeq findSquares4(IplImage img, CvMemStorage storage) {
 
-		//N = 1 at the moment - original was 11 - I put 50
-		int i, c, l, N = 50;
+		// N = 1 at the moment - original was 11 - I put 50
+		int i, c, l, N = 1;
 		CvSize sz = cvSize(img.width() & -2, img.height() & -2);
 		IplImage timg = cvCloneImage(img); // make a copy of input image
 		IplImage gray = cvCreateImage(sz, 8, 1);
@@ -160,10 +161,35 @@ public class SquareDetector {
 			// get the 4 corner slice from the "super"-slice
 			cvCvtSeqToArray(squares, rect, slice.start_index(i)
 					.end_index(i + 4));
+
+			CvPoint tl = new CvPoint();
+			tl.x(rect.position(0).x());
+			tl.y(rect.position(0).y());
+			System.out.println(tl);
+			
+			CvPoint tr = new CvPoint();
+			tr.x(rect.position(1).x());
+			tr.y(rect.position(1).y());
+			System.out.println(tr);
+			
+			CvPoint br = new CvPoint();
+			br.x(rect.position(2).x());
+			br.y(rect.position(2).y());
+			System.out.println(br);
+			
+			CvPoint bl = new CvPoint();
+			bl.x(rect.position(3).x());
+			bl.y(rect.position(3).y());
+			System.out.println(bl);
+			System.out.println();
+			
 			
 			// draw the square as a closed polyline
 			cvPolyLine(cpy, rect.position(0), count, 1, 1, CV_RGB(255, 0, 0),
 					2, CV_AA, 0);
+
+			// groupRectangles(rect.position(0), 1);
+
 		}
 
 		// saves the resultant image
@@ -184,8 +210,8 @@ public class SquareDetector {
 
 		// filename = "thr_ColorFades.jpg";
 		// filename = "thr_ColorWall.jpg";
-		filename = "thr_Pixels.jpg";
-		// filename = "thr_Squares.jpg";
+		// filename = "thr_Pixels.jpg";
+		filename = "thr_Squares.jpg";
 		// filename = "thr_Points.jpg";
 		// filename = "thr_Rainbow.jpg";
 		// filename = "thr_RGB.jpg";

@@ -181,6 +181,7 @@ public class ApproximateSquare {
 		// filename = "thr_ColorFades.jpg";
 		// filename = "thr_ColorWall.jpg";
 		// filename = "thr_Pixels.jpg";
+		// filename = "Phone.jpg";
 		filename = "thr_Squares.jpg";
 		// filename = "thr_Points.jpg";
 		// filename = "thr_Rainbow.jpg";

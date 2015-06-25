@@ -43,12 +43,13 @@ public class ColorDetector implements Runnable {
 
 		String filename = "";
 		int size = 15; // size of the rectangle
-		int range = 30; // range of colors
+		int range = 5; // range of colors
 
 		// filename = "ColorFades.jpg";
 		// filename = "ColorWall.jpg";
 		// filename = "Pixels.jpg";
-		filename = "Squares.jpg";
+		filename = "Phone.jpg";
+		// filename = "Squares.jpg";
 		// filename = "Points.jpg";
 		// filename = "Rainbow.jpg";
 		// filename = "RGB.jpg";

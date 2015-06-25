@@ -10,6 +10,8 @@ import static org.bytedeco.javacpp.opencv_core.*;
 import static org.bytedeco.javacpp.opencv_imgproc.*;
 import static org.bytedeco.javacpp.opencv_highgui.*;
 import static org.bytedeco.javacpp.opencv_core.cvRectangle;
+import static org.bytedeco.javacpp.opencv_objdetect.groupRectangles;
+
 
 public class SquareDetector {
 
@@ -149,11 +151,13 @@ public class SquareDetector {
 		IplImage cpy = cvCloneImage(img);
 		int i = 0;
 
+		
 		CvSlice slice = new CvSlice(squares);
 
 		// read 4 sequence elements at a time (all vertices of a square)
 		for (i = 0; i < squares.total(); i += 4) {
 
+			
 			// This works, may be the "cleanest" solution, does not use the
 			// "reader"
 			CvPoint rect = new CvPoint(4);
@@ -183,15 +187,13 @@ public class SquareDetector {
 			System.out.println(bl);
 			System.out.println();
 						
-			cvRectangle(cpy, bl, tr,
-					CV_RGB(255, 0, 0), 2, CV_AA, 0);
+			cvRectangle(cpy, tl, br,
+					CV_RGB(255, 0, 0), 1, CV_AA, 0);
 			
 			
-//			// draw the square as a closed polyline
-//			cvPolyLine(cpy, rect.position(0), count, 1, 1, CV_RGB(255, 0, 0),
-//					2, CV_AA, 0);
-
-			// groupRectangles(rect.position(0), 1);
+			//draw the square as a closed polyline
+			cvPolyLine(cpy, rect.position(0), count, 1, 1, CV_RGB(0, 255, 0),
+					2, CV_AA, 0);
 
 		}
 
@@ -214,6 +216,7 @@ public class SquareDetector {
 		// filename = "thr_ColorFades.jpg";
 		// filename = "thr_ColorWall.jpg";
 		// filename = "thr_Pixels.jpg";
+		// filename = "thr_Phone.jpg";
 		filename = "thr_Squares.jpg";
 		// filename = "thr_Points.jpg";
 		// filename = "thr_Rainbow.jpg";

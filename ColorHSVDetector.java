@@ -35,11 +35,13 @@ public class ColorHSVDetector implements Runnable {
 
 		// let's detect the 6 basic colors based on the HUE values:
 
-		for (i = 0; i < 7; i++) {
+		//for (i = 0; i < 7; i++) {
 
-			getThresholdedImage(s, i);
+		//violet
+		i = 5;	
+		getThresholdedImage(s, i);
 
-		}
+		//}
 	}
 
 	void getThresholdedImage(String s, int i) {
@@ -49,7 +51,8 @@ public class ColorHSVDetector implements Runnable {
 		// filename = "ColorFades.jpg";
 		// filename = "ColorWall.jpg";
 		// filename = "Pixels.jpg";
-		filename = "Squares.jpg";
+		filename = "Phone.jpg";
+		// filename = "Squares.jpg";
 		// filename = "Points.jpg";
 		// filename = "Rainbow.jpg";
 		// filename = "RGB.jpg";
@@ -111,7 +114,7 @@ public class ColorHSVDetector implements Runnable {
 		cvInRangeS(imgHSV, cvScalar(iLowH, iLowS, iLowV, 0),
 				cvScalar(iHighH, iHighS, iHighV, 0), imgThreshold);
 		cvSmooth(imgThreshold, imgThreshold, CV_MEDIAN, 15, 0, 0, 0);
-		cvSaveImage("thr_" + i + "_" + filename, imgThreshold);
+		cvSaveImage("thr_" + filename, imgThreshold);
 		System.out.println("DONE");
 	}
 

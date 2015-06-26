@@ -40,7 +40,8 @@ public class DetectApproxSquare {
 		// filename = "Phone.jpg";
 		// filename = "Pixels.jpg";
 		// filename = "Points.jpg";
-		filename = "Squares.jpg";
+		// filename = "Squares.jpg";
+		filename = "postit_1.jpg";
 
 		// loads the image
 		orgImg = cvLoadImage(filename);
@@ -50,6 +51,9 @@ public class DetectApproxSquare {
 
 		// gets the mean color in the "control card"
 		CvScalar detected_mean = mean(orgImg, 0, 0, size, size);
+		//CvScalar detected_mean = mean(orgImg, orgImg.width()-size, 0, size, size);
+		//CvScalar detected_mean = mean(orgImg, 0, orgImg.height()-size, size, size);
+		//CvScalar detected_mean = mean(orgImg, orgImg.width()-size, orgImg.height()-size, size, size);
 
 		// gets the color from the "control card" and recognizes it
 		getControlColor(detected_mean);
@@ -195,7 +199,7 @@ public class DetectApproxSquare {
 
 				// checks if the shape is too small, in that case it is not
 				// drawn
-				if ((sq.height() > 5) && (sq.width() > 5)) {
+				if ((sq.height() > 25) && (sq.width() > 25)) {
 
 					// gets the coordinates of the 4 points of the rectangle
 					CvPoint tl = new CvPoint();

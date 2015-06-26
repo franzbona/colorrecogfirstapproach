@@ -51,9 +51,12 @@ public class DetectApproxSquare {
 
 		// gets the mean color in the "control card"
 		CvScalar detected_mean = mean(orgImg, 0, 0, size, size);
-		//CvScalar detected_mean = mean(orgImg, orgImg.width()-size, 0, size, size);
-		//CvScalar detected_mean = mean(orgImg, 0, orgImg.height()-size, size, size);
-		//CvScalar detected_mean = mean(orgImg, orgImg.width()-size, orgImg.height()-size, size, size);
+		// CvScalar detected_mean = mean(orgImg, orgImg.width()-size, 0, size,
+		// size);
+		// CvScalar detected_mean = mean(orgImg, 0, orgImg.height()-size, size,
+		// size);
+		// CvScalar detected_mean = mean(orgImg, orgImg.width()-size,
+		// orgImg.height()-size, size, size);
 
 		// gets the color from the "control card" and recognizes it
 		getControlColor(detected_mean);
@@ -74,8 +77,12 @@ public class DetectApproxSquare {
 		// checks the parts of the image in the range of the color chosen
 		cvInRangeS(imgHSV, cvScalar(iLowH, iLowS, iLowV, 0),
 				cvScalar(iHighH, iHighS, iHighV, 0), imgThresh);
+		
+		//added a dilation effect
+		cvMorphologyEx(imgThresh, imgThresh, null, null, CV_MOP_DILATE, 1);
+		
 		// smooths the image according to the different parameters
-		cvSmooth(imgThresh, imgThresh, CV_MEDIAN, 15, 0, 0, 0);
+		cvSmooth(imgThresh, imgThresh, CV_MEDIAN, size, 0, 0, 0);
 
 		// temporary saves the HSV image (NO IDEA WHY I HAVE TO)
 		cvSaveImage("Temp_HSV.jpg", imgThresh);
@@ -108,14 +115,17 @@ public class DetectApproxSquare {
 		g = (int) color.green();
 		b = (int) color.blue();
 
-		System.out.println("The RGB color detected is: (" + r + ", " + g + ", " + b + ")");
-		System.out.println();
+		System.out.println("The RGB color detected is: (" + r + ", " + g + ", "
+				+ b + ")");
 
 		// converts the RGB color to HSV values - only H matters (apparently)
 		float[] hsv = Color.RGBtoHSB(r, g, b, null);
 		h = (int) (hsv[0] * 180);
 		// s = (int) (hsv[1] * 100);
 		// v = (int) (hsv[2] * 100);
+		
+		System.out.println("The H value is: " + h);
+		System.out.println();
 
 		// orange
 		if (h > 0 && h <= 22) {
@@ -174,25 +184,26 @@ public class DetectApproxSquare {
 		CvSeq cont = new CvSeq();
 
 		// finds the contours of the figures in the grayscale image
+		// CV_RETR_EXTERNAL retrieves only the extreme outer contours
 		cvFindContours(gry, storage, contours, Loader.sizeof(CvContour.class),
-				CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE, new CvPoint());
-
+				CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE, new CvPoint());
+		
 		// counts the contours
 		int count = 1;
 
-		//checks if there are rectangles detected
+		// checks if there are rectangles detected
 		if (contours.address() == 0)
 			System.out.println("No rectangles detected!");
 
-		//in this case, the loop can work
+		// in this case, the loop can work
 		else {
 			// loops around the contours
 			for (cont = contours; cont != null; cont = cont.h_next()) {
-
+				
 				// draws the contours of the identified colored shape
-				CvScalar color = CvScalar.BLUE;
-				cvDrawContours(cpy, cont, color, CV_RGB(0, 0, 0), -1,
-						CV_FILLED, 8, cvPoint(0, 0));
+//				CvScalar color = CvScalar.BLUE;
+//				cvDrawContours(cpy, cont, color, CV_RGB(0, 0, 0), -1,
+//						CV_FILLED, 8, cvPoint(0, 0));
 
 				// creates the bounding rectangle around the contours
 				CvRect sq = cvBoundingRect(cont, 0);
@@ -218,15 +229,16 @@ public class DetectApproxSquare {
 					bl.x(sq.x());
 					bl.y(sq.y() + sq.height());
 
-					System.out.println("Contour " + count);
+					System.out.println("Rectangle" + count);
 					System.out.println("Coordinates: " + tl + tr + br + bl);
-					System.out.println("");
-
+					System.out.println();
+					
 					// draws the rectangle
 					cvRectangle(cpy, tl, br, CV_RGB(255, 0, 0), 2, 8, 0);
-
-					// increases the contours counter
+					
 					count++;
+					
+					// increases the contours counter
 				}
 			}
 

@@ -15,9 +15,12 @@ public class ApproximateSquare {
 	double iHighH;
 	String filename = "";
 	String input = "";
-	IplImage finImg;
 	IplImage orgImg;
+	IplImage imgHSV;
+	IplImage imgThresh;
+	IplImage finImg;
 
+	// enum class definition
 	public enum ChosenColor {
 		orange, yellow, green, lightblue, blue, violet, red
 	}
@@ -34,6 +37,7 @@ public class ApproximateSquare {
 		CvMemStorage storage = null;
 		storage = cvCreateMemStorage(0);
 
+		// asks the user to choose the color
 		getChosenColor();
 
 		// filename = "ColorFades.jpg";
@@ -43,7 +47,10 @@ public class ApproximateSquare {
 		// filename = "Points.jpg";
 		// filename = "Squares.jpg";
 
+		// loads the image
 		orgImg = cvLoadImage(filename);
+		imgHSV = cvCreateImage(cvGetSize(orgImg), 8, 3);
+		imgThresh = cvCreateImage(cvGetSize(orgImg), 8, 1);
 
 		double iLowS = 1;
 		double iHighS = 254;
@@ -51,13 +58,13 @@ public class ApproximateSquare {
 		double iLowV = 1;
 		double iHighV = 254;
 
-		IplImage imgHSV = cvCreateImage(cvGetSize(orgImg), 8, 3);
-		IplImage imgThresh = cvCreateImage(cvGetSize(orgImg), 8, 1);
-
+		// converts the color from BGR to HSV
 		cvCvtColor(orgImg, imgHSV, CV_BGR2HSV);
 
+		// checks the parts of the image in the range of the color chosen
 		cvInRangeS(imgHSV, cvScalar(iLowH, iLowS, iLowV, 0),
 				cvScalar(iHighH, iHighS, iHighV, 0), imgThresh);
+		// smooths the image according to the different parameters
 		cvSmooth(imgThresh, imgThresh, CV_MEDIAN, 15, 0, 0, 0);
 
 		cvSaveImage("DIOCANE.jpg", imgThresh);
@@ -200,18 +207,6 @@ public class ApproximateSquare {
 
 		cvReleaseImage(cpy);
 		cvReleaseImage(gry);
-
-	}
-
-	CvScalar mean(IplImage orgImg, int x, int y, int width, int height) {
-
-		// get current ROI so that the image's roi is not changed by calling
-		CvRect old_roi = cvGetImageROI(orgImg);
-		cvSetImageROI(orgImg, cvRect(x, y, width, height));
-		CvScalar c = cvAvg(orgImg);
-		cvSetImageROI(orgImg, old_roi); // reset old roi
-		// System.out.println(c);
-		return c;
 
 	}
 

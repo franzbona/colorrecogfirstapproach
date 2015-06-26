@@ -192,7 +192,7 @@ public class SquareDetector {
 
 		// saves the resultant image
 		finImg = cvCreateImage(cvGetSize(img0), 8, 3);
-		cvSaveImage("R_" + filename, cpy);
+		cvSaveImage("Square_" + filename, cpy);
 
 		cvReleaseImage(cpy);
 	}
@@ -208,10 +208,10 @@ public class SquareDetector {
 
 		// filename = "ColorFades.jpg";
 		// filename = "ColorWall.jpg";
-		filename = "Phone.jpg";
+		// filename = "Phone.jpg";
 		// filename = "Pixels.jpg";
 		// filename = "Points.jpg";
-		// filename = "Squares.jpg";
+		filename = "Squares.jpg";
 
 		img0 = cvLoadImage(filename, 1);
 		img = cvCloneImage(img0);

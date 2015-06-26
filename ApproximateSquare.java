@@ -148,35 +148,46 @@ public class ApproximateSquare {
 
 	}
 
-	// returns sequence of squares detected on the image.
-	// the sequence is stored in the specified memory storage
+	// returns sequence of squares detected on the image and stores it in the
+	// memory storage
 	public void findSquares(IplImage img, CvMemStorage storage) {
 
-		CvSize cvSize = cvSize(img.width(), img.height());
 		IplImage gry = cvCreateImage(cvGetSize(orgImg), 8, 1);
+
+		// reloads the original image
+		IplImage cpy = cvLoadImage(filename);
+
+		// gets the HSV image passed and converts to grayscale
 		cvCvtColor(img, gry, CV_BGR2GRAY);
 		cvThreshold(gry, gry, 200, 255, CV_THRESH_BINARY);
 		cvAdaptiveThreshold(gry, gry, 255, CV_ADAPTIVE_THRESH_MEAN_C,
 				CV_THRESH_BINARY_INV, 11, 5);
 
 		CvSeq contours = new CvContour(null);
+		CvSeq cont = new CvSeq();
+
+		// finds the contours of the figures in the grayscale image
 		cvFindContours(gry, storage, contours, Loader.sizeof(CvContour.class),
 				CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE, new CvPoint());
-		CvSeq ptr = new CvSeq();
 
-		IplImage cpy = cvLoadImage(filename);
+		// counts the contours
 		int count = 1;
 
-		for (ptr = contours; ptr != null; ptr = ptr.h_next()) {
+		// loops around the contours
+		for (cont = contours; cont != null; cont = cont.h_next()) {
 
+			// draws the contours of the identified colored shape
 			CvScalar color = CvScalar.BLUE;
-			cvDrawContours(cpy, ptr, color, CV_RGB(0, 0, 0), -1, CV_FILLED, 8,
+			cvDrawContours(cpy, cont, color, CV_RGB(0, 0, 0), -1, CV_FILLED, 8,
 					cvPoint(0, 0));
 
-			CvRect sq = cvBoundingRect(ptr, 0);
+			// creates the bounding rectangle around the contours
+			CvRect sq = cvBoundingRect(cont, 0);
 
+			// checks if the shape is too small, in that case it is not drawn
 			if ((sq.height() > 5) && (sq.width() > 5)) {
 
+				// gets the coordinates of the 4 points of the rectangle
 				CvPoint tl = new CvPoint();
 				tl.x(sq.x());
 				tl.y(sq.y());
@@ -197,7 +208,10 @@ public class ApproximateSquare {
 				System.out.println("Coordinates: " + tl + tr + br + bl);
 				System.out.println("");
 
+				// draws the rectangle
 				cvRectangle(cpy, tl, br, CV_RGB(255, 0, 0), 2, 8, 0);
+
+				// increases the contours counter
 				count++;
 			}
 		}

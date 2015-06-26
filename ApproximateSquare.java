@@ -18,7 +18,7 @@ public class ApproximateSquare {
 	IplImage orgImg;
 	IplImage imgHSV;
 	IplImage imgThresh;
-	IplImage finImg;
+	IplImage newImg;
 
 	// enum class definition
 	public enum ChosenColor {
@@ -67,19 +67,22 @@ public class ApproximateSquare {
 		// smooths the image according to the different parameters
 		cvSmooth(imgThresh, imgThresh, CV_MEDIAN, 15, 0, 0, 0);
 
-		cvSaveImage("DIOCANE.jpg", imgThresh);
+		// temporary saves the HSV image (NO IDEA WHY I HAVE TO)
+		cvSaveImage("Temp_HSV.jpg", imgThresh);
 
-		// find and draw the squares
+		// re-loads the image (otherwise "ASSERTION FAILED")
+		newImg = cvLoadImage("Temp_HSV.jpg");
 
-		IplImage newImg = cvLoadImage("DIOCANE.jpg");
-		findSquares4(newImg, storage);
+		// finds the squares
+		findSquares(newImg, storage);
 
-		// release images
+		// releases the images
 		cvReleaseImage(orgImg);
 		cvReleaseImage(imgThresh);
 		cvReleaseImage(imgHSV);
 		cvReleaseImage(newImg);
-		// clear memory storage - reset free space position
+
+		// clears the memory storage
 		cvClearMemStorage(storage);
 
 	}
@@ -147,23 +150,21 @@ public class ApproximateSquare {
 
 	// returns sequence of squares detected on the image.
 	// the sequence is stored in the specified memory storage
-	public void findSquares4(IplImage img, CvMemStorage storage) {
-
-		IplImage cpy = cvLoadImage(filename);
+	public void findSquares(IplImage img, CvMemStorage storage) {
 
 		CvSize cvSize = cvSize(img.width(), img.height());
-		IplImage gry = cvCreateImage(cvSize, img.depth(), 1);
+		IplImage gry = cvCreateImage(cvGetSize(orgImg), 8, 1);
 		cvCvtColor(img, gry, CV_BGR2GRAY);
 		cvThreshold(gry, gry, 200, 255, CV_THRESH_BINARY);
 		cvAdaptiveThreshold(gry, gry, 255, CV_ADAPTIVE_THRESH_MEAN_C,
 				CV_THRESH_BINARY_INV, 11, 5);
 
 		CvSeq contours = new CvContour(null);
-		int noOfContors = cvFindContours(gry, storage, contours,
-				Loader.sizeof(CvContour.class), CV_RETR_CCOMP,
-				CV_CHAIN_APPROX_NONE, new CvPoint());
+		cvFindContours(gry, storage, contours, Loader.sizeof(CvContour.class),
+				CV_RETR_CCOMP, CV_CHAIN_APPROX_NONE, new CvPoint());
 		CvSeq ptr = new CvSeq();
 
+		IplImage cpy = cvLoadImage(filename);
 		int count = 1;
 
 		for (ptr = contours; ptr != null; ptr = ptr.h_next()) {
@@ -202,7 +203,6 @@ public class ApproximateSquare {
 		}
 
 		// saves the resultant image
-		finImg = cvCreateImage(cvGetSize(orgImg), 8, 3);
 		cvSaveImage("Rect_" + filename, cpy);
 
 		cvReleaseImage(cpy);

@@ -1,6 +1,6 @@
 /*
  * Using JavaCV to detect the squares in an image
- * SOURCE: https://www.digitalinferno.com/wiki/attach/JavaCVSquareDetector/Square.java
+ * SOURCE: https://github.com/bytedeco/javacv/blob/master/samples/Square.java
  */
 
 import org.bytedeco.javacpp.*;

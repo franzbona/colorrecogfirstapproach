@@ -1,3 +1,9 @@
+/*
+ * Using JavaCV to approximate colored shape to a rectangle
+ * SOURCE: http://stackoverflow.com/questions/12106307/how-to-get-x-y-coordinates-of-extracted-objects-in-javacv
+ * SOURCE: http://stackoverflow.com/questions/11795691/javacv-warning-sign-detection
+ */
+
 import java.util.Scanner;
 
 import org.bytedeco.javacpp.*;

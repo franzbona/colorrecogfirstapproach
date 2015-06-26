@@ -14,12 +14,133 @@ public class ApproximateSquare {
 	double iLowH;
 	double iHighH;
 	String filename = "";
+	String input = "";
 	IplImage finImg;
 	IplImage orgImg;
 
+	public enum ChosenColor {
+		orange, yellow, green, lightblue, blue, violet, red
+	}
+
+	ChosenColor color;
+
+	public static void main(String args[]) {
+		new ApproximateSquare().main();
+	}
+
+	public void main() {
+
+		// creates memory storage that will contain all the dynamic data
+		CvMemStorage storage = null;
+		storage = cvCreateMemStorage(0);
+
+		getChosenColor();
+
+		// filename = "ColorFades.jpg";
+		// filename = "ColorWall.jpg";
+		filename = "Phone.jpg";
+		// filename = "Pixels.jpg";
+		// filename = "Points.jpg";
+		// filename = "Squares.jpg";
+
+		orgImg = cvLoadImage(filename);
+
+		double iLowS = 1;
+		double iHighS = 254;
+
+		double iLowV = 1;
+		double iHighV = 254;
+
+		IplImage imgHSV = cvCreateImage(cvGetSize(orgImg), 8, 3);
+		IplImage imgThresh = cvCreateImage(cvGetSize(orgImg), 8, 1);
+
+		cvCvtColor(orgImg, imgHSV, CV_BGR2HSV);
+
+		cvInRangeS(imgHSV, cvScalar(iLowH, iLowS, iLowV, 0),
+				cvScalar(iHighH, iHighS, iHighV, 0), imgThresh);
+		cvSmooth(imgThresh, imgThresh, CV_MEDIAN, 15, 0, 0, 0);
+
+		cvSaveImage("DIOCANE.jpg", imgThresh);
+
+		// find and draw the squares
+
+		IplImage newImg = cvLoadImage("DIOCANE.jpg");
+		findSquares4(newImg, storage);
+
+		// release images
+		cvReleaseImage(orgImg);
+		cvReleaseImage(imgThresh);
+		cvReleaseImage(imgHSV);
+		cvReleaseImage(newImg);
+		// clear memory storage - reset free space position
+		cvClearMemStorage(storage);
+
+	}
+
+	public void getChosenColor() {
+
+		// asks for input
+		Scanner in = new Scanner(System.in);
+
+		// loops till gets a valid ENUM input
+		do {
+			System.out.println("Which colour would you like to detect?");
+			input = in.nextLine().toLowerCase();
+			// System.out.println("You entered " + input);
+
+			// checks if input is present, then sets the values
+			for (ChosenColor c : ChosenColor.values()) {
+				if (c.name().equals(input)) {
+					switch (input) {
+
+					case "orange":
+						iLowH = 0;
+						iHighH = 22;
+						return;
+					case "yellow":
+						iLowH = 22;
+						iHighH = 38;
+						return;
+					case "green":
+						iLowH = 38;
+						iHighH = 75;
+						return;
+					case "light blue":
+						iLowH = 75;
+						iHighH = 100;
+						return;
+					case "blue":
+						iLowH = 100;
+						iHighH = 130;
+						return;
+					case "violet":
+						iLowH = 130;
+						iHighH = 160;
+						return;
+					case "red":
+						iLowH = 160;
+						iHighH = 179;
+						return;
+					default:
+						input = "";
+						return;
+					}
+				}
+			}
+
+			// otherwise resets the input to empty
+			input = "";
+		}
+
+		while (input.isEmpty());
+
+		in.close();
+
+	}
+
 	// returns sequence of squares detected on the image.
 	// the sequence is stored in the specified memory storage
-	void findSquares4(IplImage img, CvMemStorage storage) {
+	public void findSquares4(IplImage img, CvMemStorage storage) {
 
 		IplImage cpy = cvLoadImage(filename);
 
@@ -75,107 +196,10 @@ public class ApproximateSquare {
 
 		// saves the resultant image
 		finImg = cvCreateImage(cvGetSize(orgImg), 8, 3);
-		cvSaveImage("R_" + filename, cpy);
+		cvSaveImage("Rect_" + filename, cpy);
 
 		cvReleaseImage(cpy);
 		cvReleaseImage(gry);
-
-	}
-
-	public static void main(String args[]) {
-		new ApproximateSquare().main();
-	}
-
-	public void main() {
-
-		// create memory storage that will contain all the dynamic data
-		CvMemStorage storage = null;
-		storage = cvCreateMemStorage(0);
-
-		String s = "";
-		Scanner in = new Scanner(System.in);
-
-		while (s.isEmpty()) {
-
-			System.out.println("Which colour would you like to detect?");
-			s = in.nextLine().toLowerCase();
-			System.out.println("You entered " + s);
-		}
-		in.close();
-
-		switch (s) {
-
-		case "orange":
-			iLowH = 0;
-			iHighH = 22;
-			break;
-		case "yellow":
-			iLowH = 22;
-			iHighH = 38;
-			break;
-		case "green":
-			iLowH = 38;
-			iHighH = 75;
-			break;
-		case "light blue":
-			iLowH = 75;
-			iHighH = 100;
-			break;
-		case "blue":
-			iLowH = 100;
-			iHighH = 130;
-			break;
-		case "violet":
-			iLowH = 130;
-			iHighH = 160;
-			break;
-		case "red":
-			iLowH = 160;
-			iHighH = 179;
-			break;
-		default:
-			iLowH = 0;
-			iHighH = 0;
-		}
-
-		// filename = "ColorFades.jpg";
-		// filename = "ColorWall.jpg";
-		filename = "Phone.jpg";
-		// filename = "Pixels.jpg";
-		// filename = "Points.jpg";
-		// filename = "Squares.jpg";
-
-		orgImg = cvLoadImage(filename);
-
-		double iLowS = 1;
-		double iHighS = 254;
-
-		double iLowV = 1;
-		double iHighV = 254;
-
-		IplImage imgHSV = cvCreateImage(cvGetSize(orgImg), 8, 3);
-		IplImage imgThresh = cvCreateImage(cvGetSize(orgImg), 8, 1);
-
-		cvCvtColor(orgImg, imgHSV, CV_BGR2HSV);
-
-		cvInRangeS(imgHSV, cvScalar(iLowH, iLowS, iLowV, 0),
-				cvScalar(iHighH, iHighS, iHighV, 0), imgThresh);
-		cvSmooth(imgThresh, imgThresh, CV_MEDIAN, 15, 0, 0, 0);
-
-		cvSaveImage("DIOCANE.jpg", imgThresh);
-
-		// find and draw the squares
-
-		IplImage newImg = cvLoadImage("DIOCANE.jpg");
-		findSquares4(newImg, storage);
-
-		// release images
-		cvReleaseImage(orgImg);
-		cvReleaseImage(imgThresh);
-		cvReleaseImage(imgHSV);
-		cvReleaseImage(newImg);
-		// clear memory storage - reset free space position
-		cvClearMemStorage(storage);
 
 	}
 

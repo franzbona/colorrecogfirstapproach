@@ -14,9 +14,73 @@ public class ApproximateSquare {
 	double iLowH;
 	double iHighH;
 	String filename = "";
-	String color;
 	IplImage finImg;
 	IplImage orgImg;
+
+	// returns sequence of squares detected on the image.
+	// the sequence is stored in the specified memory storage
+	void findSquares4(IplImage img, CvMemStorage storage) {
+
+		IplImage cpy = cvLoadImage(filename);
+
+		CvSize cvSize = cvSize(img.width(), img.height());
+		IplImage gry = cvCreateImage(cvSize, img.depth(), 1);
+		cvCvtColor(img, gry, CV_BGR2GRAY);
+		cvThreshold(gry, gry, 200, 255, CV_THRESH_BINARY);
+		cvAdaptiveThreshold(gry, gry, 255, CV_ADAPTIVE_THRESH_MEAN_C,
+				CV_THRESH_BINARY_INV, 11, 5);
+
+		CvSeq contours = new CvContour(null);
+		int noOfContors = cvFindContours(gry, storage, contours,
+				Loader.sizeof(CvContour.class), CV_RETR_CCOMP,
+				CV_CHAIN_APPROX_NONE, new CvPoint());
+		CvSeq ptr = new CvSeq();
+
+		int count = 1;
+
+		for (ptr = contours; ptr != null; ptr = ptr.h_next()) {
+
+			CvScalar color = CvScalar.BLUE;
+			cvDrawContours(cpy, ptr, color, CV_RGB(0, 0, 0), -1, CV_FILLED, 8,
+					cvPoint(0, 0));
+
+			CvRect sq = cvBoundingRect(ptr, 0);
+
+			if ((sq.height() > 5) && (sq.width() > 5)) {
+
+				CvPoint tl = new CvPoint();
+				tl.x(sq.x());
+				tl.y(sq.y());
+
+				CvPoint tr = new CvPoint();
+				tr.x(sq.x() + sq.width());
+				tr.y(sq.y());
+
+				CvPoint br = new CvPoint();
+				br.x(sq.x() + sq.width());
+				br.y(sq.y() + sq.height());
+
+				CvPoint bl = new CvPoint();
+				bl.x(sq.x());
+				bl.y(sq.y() + sq.height());
+
+				System.out.println("Contour " + count);
+				System.out.println("Coordinates: " + tl + tr + br + bl);
+				System.out.println("");
+
+				cvRectangle(cpy, tl, br, CV_RGB(255, 0, 0), 2, 8, 0);
+				count++;
+			}
+		}
+
+		// saves the resultant image
+		finImg = cvCreateImage(cvGetSize(orgImg), 8, 3);
+		cvSaveImage("R_" + filename, cpy);
+
+		cvReleaseImage(cpy);
+		cvReleaseImage(gry);
+
+	}
 
 	public static void main(String args[]) {
 		new ApproximateSquare().main();
@@ -24,22 +88,22 @@ public class ApproximateSquare {
 
 	public void main() {
 
-		// creates memory storage that contains all the dynamic data
+		// create memory storage that will contain all the dynamic data
 		CvMemStorage storage = null;
 		storage = cvCreateMemStorage(0);
 
-		color = "";
+		String s = "";
 		Scanner in = new Scanner(System.in);
 
-		while (color.isEmpty()) {
+		while (s.isEmpty()) {
 
 			System.out.println("Which colour would you like to detect?");
-			color = in.nextLine().toLowerCase();
-			System.out.println("You entered " + color);
+			s = in.nextLine().toLowerCase();
+			System.out.println("You entered " + s);
 		}
 		in.close();
 
-		switch (color) {
+		switch (s) {
 
 		case "orange":
 			iLowH = 0;
@@ -112,71 +176,6 @@ public class ApproximateSquare {
 		cvReleaseImage(newImg);
 		// clear memory storage - reset free space position
 		cvClearMemStorage(storage);
-
-	}
-
-	// returns sequence of squares detected on the image.
-	// the sequence is stored in the specified memory storage
-	void findSquares4(IplImage img, CvMemStorage storage) {
-
-		IplImage cpy = cvLoadImage(filename);
-
-		CvSize cvSize = cvSize(img.width(), img.height());
-		IplImage gry = cvCreateImage(cvSize, img.depth(), 1);
-		cvCvtColor(img, gry, CV_BGR2GRAY);
-		cvThreshold(gry, gry, 200, 255, CV_THRESH_BINARY);
-		cvAdaptiveThreshold(gry, gry, 255, CV_ADAPTIVE_THRESH_MEAN_C,
-				CV_THRESH_BINARY_INV, 11, 5);
-
-		CvSeq contours = new CvContour(null);
-		int noOfContors = cvFindContours(gry, storage, contours,
-				Loader.sizeof(CvContour.class), CV_RETR_CCOMP,
-				CV_CHAIN_APPROX_NONE, new CvPoint());
-		CvSeq ptr = new CvSeq();
-
-		int count = 1;
-
-		for (ptr = contours; ptr != null; ptr = ptr.h_next()) {
-
-			CvScalar color = CvScalar.BLUE;
-			cvDrawContours(cpy, ptr, color, CV_RGB(0, 0, 0), -1, CV_FILLED, 8,
-					cvPoint(0, 0));
-
-			CvRect sq = cvBoundingRect(ptr, 0);
-
-			if ((sq.height() > 5) && (sq.width() > 5)) {
-
-				CvPoint tl = new CvPoint();
-				tl.x(sq.x());
-				tl.y(sq.y());
-
-				CvPoint tr = new CvPoint();
-				tr.x(sq.x() + sq.width());
-				tr.y(sq.y());
-
-				CvPoint br = new CvPoint();
-				br.x(sq.x() + sq.width());
-				br.y(sq.y() + sq.height());
-
-				CvPoint bl = new CvPoint();
-				bl.x(sq.x());
-				bl.y(sq.y() + sq.height());
-
-				System.out.println("Contour " + count);
-				System.out.println("Coordinates: " + tl + tr + br + bl);
-				System.out.println("");
-
-				cvRectangle(cpy, tl, br, CV_RGB(255, 0, 0), 2, 8, 0);
-				count++;
-			}
-		}
-
-		// saves the resultant image
-		finImg = cvCreateImage(cvGetSize(orgImg), 8, 3);
-		cvSaveImage("R_" + filename, cpy);
-
-		cvReleaseImage(cpy);
-		cvReleaseImage(gry);
 
 	}
 

@@ -1,7 +1,9 @@
 /*
  * Using JavaCV to approximate colored shape to a rectangle accoring to the color picked in the control card
  * SOURCE: http://stackoverflow.com/questions/12106307/how-to-get-x-y-coordinates-of-extracted-objects-in-javacv
- * SOURCE: http://stackoverflow.com/questions/11795691/javacv-warning-sign-detection
+ * HELP: http://stackoverflow.com/questions/11795691/javacv-warning-sign-detection
+ * HELP: http://www.javacodegeeks.com/2012/12/hand-and-finger-detection-using-javacv.html
+ * HELP: http://stackoverflow.com/questions/11388683/opencv-javacv-how-to-iterate-over-contours-for-shape-identification
  */
 
 import java.awt.Color;
@@ -50,16 +52,13 @@ public class DetectApproxSquare {
 		size = 15;
 
 		// gets the mean color in the "control card"
-		CvScalar detected_mean = mean(orgImg, 0, 0, size, size);
-		// CvScalar detected_mean = mean(orgImg, orgImg.width()-size, 0, size,
-		// size);
-		// CvScalar detected_mean = mean(orgImg, 0, orgImg.height()-size, size,
-		// size);
-		// CvScalar detected_mean = mean(orgImg, orgImg.width()-size,
-		// orgImg.height()-size, size, size);
+		// CvScalar mean = mean(orgImg, 0, 0, size, size);
+		// CvScalar mean = mean(orgImg, orgImg.width()-size, 0, size, size);
+		CvScalar mean = mean(orgImg, 0, orgImg.height()-size, size, size);
+		// CvScalar mean = mean(orgImg, orgImg.width()-size, orgImg.height()-size, size, size);
 
 		// gets the color from the "control card" and recognizes it
-		getControlColor(detected_mean);
+		getControlColor(mean);
 
 		imgHSV = cvCreateImage(cvGetSize(orgImg), 8, 3);
 		imgThresh = cvCreateImage(cvGetSize(orgImg), 8, 1);
@@ -77,9 +76,6 @@ public class DetectApproxSquare {
 		// checks the parts of the image in the range of the color chosen
 		cvInRangeS(imgHSV, cvScalar(iLowH, iLowS, iLowV, 0),
 				cvScalar(iHighH, iHighS, iHighV, 0), imgThresh);
-		
-		//added a dilation effect
-		cvMorphologyEx(imgThresh, imgThresh, null, null, CV_MOP_DILATE, 1);
 		
 		// smooths the image according to the different parameters
 		cvSmooth(imgThresh, imgThresh, CV_MEDIAN, size, 0, 0, 0);

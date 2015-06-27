@@ -76,9 +76,12 @@ public class DetectApproxSquare {
 		// checks the parts of the image in the range of the color chosen
 		cvInRangeS(imgHSV, cvScalar(iLowH, iLowS, iLowV, 0),
 				cvScalar(iHighH, iHighS, iHighV, 0), imgThresh);
-		
+
+		// added a dilation effect
+		cvMorphologyEx(imgThresh, imgThresh, null, null, CV_MOP_DILATE, 1);
+
 		// smooths the image according to the different parameters
-		cvSmooth(imgThresh, imgThresh, CV_MEDIAN, size, 0, 0, 0);
+		cvSmooth(imgThresh, imgThresh, CV_MEDIAN, 99, 0, 0, 0);
 
 		// temporary saves the HSV image (NO IDEA WHY I HAVE TO)
 		cvSaveImage("Temp_HSV.jpg", imgThresh);
@@ -119,7 +122,7 @@ public class DetectApproxSquare {
 		h = (int) (hsv[0] * 180);
 		// s = (int) (hsv[1] * 100);
 		// v = (int) (hsv[2] * 100);
-		
+
 		System.out.println("The H value is: " + h);
 		System.out.println();
 
@@ -183,7 +186,7 @@ public class DetectApproxSquare {
 		// CV_RETR_EXTERNAL retrieves only the extreme outer contours
 		cvFindContours(gry, storage, contours, Loader.sizeof(CvContour.class),
 				CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE, new CvPoint());
-		
+
 		// counts the contours
 		int count = 1;
 
@@ -195,11 +198,11 @@ public class DetectApproxSquare {
 		else {
 			// loops around the contours
 			for (cont = contours; cont != null; cont = cont.h_next()) {
-				
+
 				// draws the contours of the identified colored shape
-//				CvScalar color = CvScalar.BLUE;
-//				cvDrawContours(cpy, cont, color, CV_RGB(0, 0, 0), -1,
-//						CV_FILLED, 8, cvPoint(0, 0));
+				CvScalar color = CvScalar.BLUE;
+				cvDrawContours(cpy, cont, color, CV_RGB(0, 0, 0), -1,
+						CV_FILLED, 8, cvPoint(0, 0));
 
 				// creates the bounding rectangle around the contours
 				CvRect sq = cvBoundingRect(cont, 0);
@@ -228,13 +231,10 @@ public class DetectApproxSquare {
 					System.out.println("Rectangle" + count);
 					System.out.println("Coordinates: " + tl + tr + br + bl);
 					System.out.println();
-					
+
 					// draws the rectangle
 					cvRectangle(cpy, tl, br, CV_RGB(255, 0, 0), 2, 8, 0);
-					
 					count++;
-					
-					// increases the contours counter
 				}
 			}
 

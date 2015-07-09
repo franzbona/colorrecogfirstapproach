@@ -36,8 +36,8 @@ public class DetectApproxSquare {
 		CvMemStorage storage = null;
 		storage = cvCreateMemStorage(0);
 
-		// filename = "1_dark.jpg";
-		filename = "1_light.jpg";
+		filename = "1_dark.jpg";
+		// filename = "3_light.jpg";
 
 		// loads the image
 		orgImg = cvLoadImage(filename);

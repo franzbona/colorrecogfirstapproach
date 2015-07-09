@@ -43,8 +43,7 @@ public class DetectApproxSquare {
 		// filename = "Pixels.jpg";
 		// filename = "Points.jpg";
 		// filename = "Squares.jpg";
-		// filename = "postit_1.jpg";
-		filename = "highlighter_1.jpg";
+		filename = "postit.jpg";
 
 		// loads the image
 		orgImg = cvLoadImage(filename);
@@ -53,9 +52,9 @@ public class DetectApproxSquare {
 		size = 50;
 
 		// gets the mean color in the "control card"
-		CvScalar mean = mean(orgImg, 0, 0, size, size);
+		// CvScalar mean = mean(orgImg, 0, 0, size, size);
 		// CvScalar mean = mean(orgImg, orgImg.width()-size, 0, size, size);
-		// CvScalar mean = mean(orgImg, 0, orgImg.height()-size, size, size);
+		CvScalar mean = mean(orgImg, 0, orgImg.height()-size, size, size);
 		// CvScalar mean = mean(orgImg, orgImg.width()-size, orgImg.height()-size, size, size);
 
 		// gets the color from the "control card" and recognizes it

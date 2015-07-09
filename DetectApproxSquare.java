@@ -6,7 +6,6 @@
  * HELP: http://stackoverflow.com/questions/11388683/opencv-javacv-how-to-iterate-over-contours-for-shape-identification
  */
 
-import java.awt.Color;
 import org.bytedeco.javacpp.*;
 import org.bytedeco.javacpp.opencv_core.CvRect;
 import org.bytedeco.javacpp.opencv_core.CvScalar;
@@ -18,14 +17,14 @@ import static org.bytedeco.javacpp.opencv_highgui.*;
 
 public class DetectApproxSquare {
 
-	double iLowH;
-	double iHighH;
 	String filename = "";
 	int size = 0;
+	int range = 0;
+	CvScalar mean;
+	CvScalar min;
+	CvScalar max;
 	IplImage orgImg;
-	IplImage imgHSV;
 	IplImage imgThresh;
-	IplImage newImg;
 
 	public static void main(String args[]) {
 		new DetectApproxSquare().main();
@@ -37,13 +36,6 @@ public class DetectApproxSquare {
 		CvMemStorage storage = null;
 		storage = cvCreateMemStorage(0);
 
-		// filename = "ColorFades.jpg";
-		// filename = "ColorWall.jpg";
-		// filename = "Phone.jpg";
-		// filename = "Pixels.jpg";
-		// filename = "Points.jpg";
-		// filename = "Squares.jpg";
-		// filename = "postit.jpg";
 		// filename = "1_dark.jpg";
 		filename = "1_light.jpg";
 
@@ -52,117 +44,95 @@ public class DetectApproxSquare {
 
 		// size of the "control card"
 		size = 50;
+		range = 40; // range of colors
 
 		// gets the mean color in the "control card"
-		CvScalar mean = mean(orgImg, 0, 0, size, size);
-		// CvScalar mean = mean(orgImg, orgImg.width()-size, 0, size, size);
-		// CvScalar mean = mean(orgImg, 0, orgImg.height()-size, size, size);
-		// CvScalar mean = mean(orgImg, orgImg.width()-size, orgImg.height()-size, size, size);
+		mean = mean(orgImg, 0, 0, size, size);
+		// mean = mean(orgImg, orgImg.width() - size, 0, size, size);
+		// mean = mean(orgImg, 0, orgImg.height()-size, size, size);
+		// mean = mean(orgImg, orgImg.width()-size, orgImg.height()-size, size, size);
 
 		// gets the color from the "control card" and recognizes it
 		getControlColor(mean);
 
-		imgHSV = cvCreateImage(cvGetSize(orgImg), 8, 3);
 		imgThresh = cvCreateImage(cvGetSize(orgImg), 8, 1);
 
-		// sets Saturation and Brightness to the whole spectrum
-		double iLowS = 1;
-		double iHighS = 254;
-
-		double iLowV = 1;
-		double iHighV = 254;
-
-		// converts the color from BGR to HSV
-		cvCvtColor(orgImg, imgHSV, CV_BGR2HSV);
-
 		// checks the parts of the image in the range of the color chosen
-		cvInRangeS(imgHSV, cvScalar(iLowH, iLowS, iLowV, 0),
-				cvScalar(iHighH, iHighS, iHighV, 0), imgThresh);
-
-		// added a dilation effect
-		cvMorphologyEx(imgThresh, imgThresh, null, null, CV_MOP_DILATE, 1);
+		cvInRangeS(orgImg, min, max, imgThresh);
 
 		// smooths the image according to the different parameters
-		cvSmooth(imgThresh, imgThresh, CV_MEDIAN, 99, 0, 0, 0);
+		cvSmooth(imgThresh, imgThresh, CV_MEDIAN, 15, 0, 0, 0);
 
-		// temporary saves the HSV image (NO IDEA WHY I HAVE TO)
-		cvSaveImage("Temp_HSV.jpg", imgThresh);
+		// temporary saves the image (NO IDEA WHY I HAVE TO)
+		cvSaveImage("Temp.jpg", imgThresh);
 
 		// re-loads the image (otherwise "ASSERTION FAILED")
-		newImg = cvLoadImage("Temp_HSV.jpg");
+		imgThresh = cvLoadImage("Temp.jpg");
 
 		// finds the squares
-		findSquares(newImg, storage);
+		findSquares(imgThresh, storage);
 
 		// releases the images
 		cvReleaseImage(orgImg);
 		cvReleaseImage(imgThresh);
-		cvReleaseImage(imgHSV);
-		cvReleaseImage(newImg);
 
 		// clears the memory storage
 		cvClearMemStorage(storage);
 
 	}
 
-	public void getControlColor(CvScalar color) {
+	public void getControlColor(CvScalar mean) {
 
-		int r, g, b, h;
+		int r = (int) mean.red();
+		int g = (int) mean.green();
+		int b = (int) mean.blue();
 
-		// System.out.println(color);
+		System.out.println("RGB: (" + r + ", " + g + ", " + b + ")");
 
-		// gets the RGB components from the detected color in the "control card"
-		r = (int) color.red();
-		g = (int) color.green();
-		b = (int) color.blue();
-
-		System.out.println("The RGB color detected is: (" + r + ", " + g + ", "
-				+ b + ")");
-
-		// converts the RGB color to HSV values - only H matters (apparently)
-		float[] hsv = Color.RGBtoHSB(r, g, b, null);
-		h = (int) (hsv[0] * 180);
-		// s = (int) (hsv[1] * 100);
-		// v = (int) (hsv[2] * 100);
-
-		System.out.println("The H value is: " + h);
-		System.out.println();
-
-		// orange
-		if (h > 0 && h <= 22) {
-			iLowH = 0;
-			iHighH = 22;
-		}
-		// yellow
-		if (h > 22 && h <= 38) {
-			iLowH = 22;
-			iHighH = 38;
-		}
-		// green
-		if (h > 38 && h <= 75) {
-			iLowH = 38;
-			iHighH = 75;
-		}
-		// light blue
-		if (h > 75 && h <= 100) {
-			iLowH = 75;
-			iHighH = 100;
-		}
-		// blue
-		if (h > 100 && h <= 130) {
-			iLowH = 100;
-			iHighH = 130;
-		}
-		// violet
-		if (h > 130 && h <= 160) {
-			iLowH = 130;
-			iHighH = 160;
-		}
 		// red
-		if (h > 160 && h <= 180) {
-			iLowH = 160;
-			iHighH = 180;
-		}
+		double min_r;
+		if ((mean.red() - range) < 0)
+			min_r = 0;
+		else
+			min_r = (mean.red() - range);
+
+		double max_r;
+		if ((mean.red() + range) > 255)
+			max_r = 255;
+		else
+			max_r = (mean.red() + range);
+
+		// green
+		double min_g;
+		if ((mean.green() - range) < 0)
+			min_g = 0;
+		else
+			min_g = (mean.green() - range);
+
+		double max_g;
+		if ((mean.green() + range) > 255)
+			max_g = 255;
+		else
+			max_g = (mean.green() + range);
+
+		// blue
+		double min_b;
+		if ((mean.blue() - range) < 0)
+			min_b = 0;
+		else
+			min_b = (mean.blue() - range);
+
+		double max_b;
+		if ((mean.blue() + range) > 255)
+			max_b = 255;
+		else
+			max_b = (mean.blue() + range);
+
+		min = cvScalar(min_b, min_g, min_r, 0);
+		System.out.println(min);
+		max = cvScalar(max_b, max_g, max_r, 0);
+		System.out.println(max);
+		System.out.println();
 
 	}
 

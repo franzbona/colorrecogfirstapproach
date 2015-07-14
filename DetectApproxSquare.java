@@ -36,21 +36,28 @@ public class DetectApproxSquare {
 		CvMemStorage storage = null;
 		storage = cvCreateMemStorage(0);
 
-		filename = "1_dark.jpg";
-		// filename = "3_light.jpg";
+		// filename = "1+0.jpg";
+		// filename = "2+0.jpg";
+		filename = "1+1.jpg";
+		// filename = "2+1.jpg";
+		// filename = "1+2.jpg";
+		// filename = "2+2.jpg";
+		// filename = "1+3.jpg";
+		// filename = "2+3.jpg";
+
 
 		// loads the image
 		orgImg = cvLoadImage(filename);
 
 		// size of the "control card"
-		size = 50;
+		size = 20;
 		range = 40; // range of colors
 
 		// gets the mean color in the "control card"
-		mean = mean(orgImg, 0, 0, size, size);
+		// mean = mean(orgImg, 0, 0, size, size);
 		// mean = mean(orgImg, orgImg.width() - size, 0, size, size);
 		// mean = mean(orgImg, 0, orgImg.height()-size, size, size);
-		// mean = mean(orgImg, orgImg.width()-size, orgImg.height()-size, size, size);
+		mean = mean(orgImg, orgImg.width()-size, orgImg.height()-size, size, size);
 
 		// gets the color from the "control card" and recognizes it
 		getControlColor(mean);
